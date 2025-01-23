@@ -1,0 +1,12 @@
+<div class="floor-list">
+  <h2>Floors</h2>
+  <div class="floor-buttons">
+    @for (floor of floors(); track floor) {
+      <button 
+        [class.selected]="selectedFloor()?.floorNumber === floor"
+        (click)="onFloorSelect(floor)">
+        Floor {{ floor }}
+      </button>
+    }
+  </div>
+</div>
