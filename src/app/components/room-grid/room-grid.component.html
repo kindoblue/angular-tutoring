@@ -4,7 +4,10 @@
     <div class="rooms">
       @for (room of selectedFloor()?.rooms; track room.id) {
         <div class="room">
-          <h3>{{ room.name }}</h3>
+          <h3>
+            <span>{{ room.name }}</span>
+            <span class="room-number">Room {{ room.roomNumber }}</span>
+          </h3>
           <div class="seats">
             @for (seat of room.seats; track seat.id) {
               <div 
