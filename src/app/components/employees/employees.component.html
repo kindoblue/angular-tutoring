@@ -1,0 +1,18 @@
+<div class="employees-container">
+  <h1>Employees</h1>
+
+  <div class="employees-grid">
+    <mat-card class="employee-card" *ngFor="let employee of employees$ | async">
+      <mat-card-content>
+        <div class="employee-content">
+          <div class="employee-info">
+            <h3>{{employee.firstName}} {{employee.lastName}}</h3>
+            <p class="occupation">{{employee.occupation}}</p>
+            <p class="employee-id">ID: {{employee.id}}</p>
+          </div>
+          <mat-icon class="employee-icon">person</mat-icon>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

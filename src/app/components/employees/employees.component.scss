@@ -1,0 +1,50 @@
+.employees-container {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.employees-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.employee-card {
+  .employee-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1rem;
+
+    .employee-info {
+      h3 {
+        margin: 0;
+        color: rgba(0, 0, 0, 0.87);
+        font-size: 1.2rem;
+      }
+
+      .occupation {
+        margin: 0.5rem 0;
+        color: #1976d2;
+        font-weight: 500;
+      }
+
+      .employee-id {
+        color: rgba(0, 0, 0, 0.6);
+        font-size: 0.875rem;
+      }
+    }
+
+    .employee-icon {
+      font-size: 2.5rem;
+      width: 2.5rem;
+      height: 2.5rem;
+      color: #1976d2;
+    }
+  }
+}
