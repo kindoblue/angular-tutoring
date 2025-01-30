@@ -1,0 +1,13 @@
+.logo-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+svg {
+  transition: transform 0.3s ease;
+}
+
+:host:hover svg {
+  transform: scale(1.05);
+} 
