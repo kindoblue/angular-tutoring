@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, of } from 'rxjs';
-import { catchError, retry, map } from 'rxjs/operators';
+import { catchError, retry } from 'rxjs/operators';
 
 export interface Employee {
   id: number;
@@ -14,8 +14,8 @@ export interface Employee {
 export interface EmployeeResponse {
   content: Employee[];
   totalElements: number;
-  currentPage: number;
   totalPages: number;
+  currentPage: number;
   size: number;
 }
 
@@ -51,65 +51,19 @@ export class EmployeeService {
     let params = new HttpParams()
       .set('page', pageIndex.toString())
       .set('size', pageSize.toString());
-    
+
     if (searchTerm) {
       params = params.set('search', searchTerm);
     }
 
-    return this.http.get<Employee[] | EmployeeResponse>(this.apiUrl, { params }).pipe(
+    // Use the search endpoint
+    const url = `${this.apiUrl}/search`;
+    
+    return this.http.get<EmployeeResponse>(url, { params }).pipe(
       retry(1),
-      map(response => {
-        // Check if response is an array (non-paginated)
-        if (Array.isArray(response)) {
-          let filteredEmployees = response;
-          
-          if (searchTerm) {
-            const search = searchTerm.toLowerCase();
-            filteredEmployees = response.filter(emp => 
-              emp.fullName.toLowerCase().includes(search) ||
-              emp.occupation.toLowerCase().includes(search)
-            );
-          }
-
-          const startIndex = pageIndex * pageSize;
-          const content = filteredEmployees.slice(startIndex, startIndex + pageSize);
-          const totalElements = filteredEmployees.length;
-          
-          return {
-            content,
-            totalElements,
-            currentPage: pageIndex,
-            totalPages: Math.ceil(totalElements / pageSize),
-            size: pageSize
-          };
-        }
-        // If it's already in EmployeeResponse format, return as is
-        return response as EmployeeResponse;
-      }),
       catchError((error) => {
-        console.warn('Falling back to mock data due to API error:', error);
-        // Fallback to mock data if API fails
-        let filteredEmployees = this.mockEmployees;
-        
-        if (searchTerm) {
-          const search = searchTerm.toLowerCase();
-          filteredEmployees = this.mockEmployees.filter(emp => 
-            emp.fullName.toLowerCase().includes(search) ||
-            emp.occupation.toLowerCase().includes(search)
-          );
-        }
-
-        const startIndex = pageIndex * pageSize;
-        const content = filteredEmployees.slice(startIndex, startIndex + pageSize);
-        const totalElements = filteredEmployees.length;
-        
-        return of({
-          content,
-          totalElements,
-          currentPage: pageIndex,
-          totalPages: Math.ceil(totalElements / pageSize),
-          size: pageSize
-        });
+        console.warn('Error fetching employees:', error);
+        return throwError(() => error);
       })
     );
   }
@@ -118,9 +72,8 @@ export class EmployeeService {
     return this.http.get<Employee>(`${this.apiUrl}/${id}`).pipe(
       retry(1),
       catchError((error) => {
-        console.warn('Falling back to mock data due to API error:', error);
-        const employee = this.mockEmployees.find(emp => emp.id === id);
-        return employee ? of(employee) : throwError(() => new Error('Employee not found'));
+        console.error('Error fetching employee:', error);
+        return throwError(() => error);
       })
     );
   }
@@ -128,15 +81,8 @@ export class EmployeeService {
   createEmployee(employee: Omit<Employee, 'id' | 'createdAt'>): Observable<Employee> {
     return this.http.post<Employee>(this.apiUrl, employee).pipe(
       catchError((error) => {
-        console.warn('Falling back to mock data due to API error:', error);
-        const newId = Math.max(...this.mockEmployees.map(emp => emp.id)) + 1;
-        const newEmployee = { 
-          ...employee, 
-          id: newId,
-          createdAt: [2025, 1, 28, 8, 8, 2, 530895000] // Mock creation date
-        };
-        this.mockEmployees.push(newEmployee);
-        return of(newEmployee);
+        console.error('Error creating employee:', error);
+        return throwError(() => error);
       })
     );
   }
@@ -144,17 +90,8 @@ export class EmployeeService {
   updateEmployee(id: number, employee: Omit<Employee, 'id' | 'createdAt'>): Observable<Employee> {
     return this.http.put<Employee>(`${this.apiUrl}/${id}`, employee).pipe(
       catchError((error) => {
-        console.warn('Falling back to mock data due to API error:', error);
-        const index = this.mockEmployees.findIndex(emp => emp.id === id);
-        if (index === -1) {
-          return throwError(() => new Error('Employee not found'));
-        }
-        const updatedEmployee = {
-          ...this.mockEmployees[index],
-          ...employee
-        };
-        this.mockEmployees[index] = updatedEmployee;
-        return of(updatedEmployee);
+        console.error('Error updating employee:', error);
+        return throwError(() => error);
       })
     );
   }
@@ -162,13 +99,8 @@ export class EmployeeService {
   deleteEmployee(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
       catchError((error) => {
-        console.warn('Falling back to mock data due to API error:', error);
-        const index = this.mockEmployees.findIndex(emp => emp.id === id);
-        if (index === -1) {
-          return throwError(() => new Error('Employee not found'));
-        }
-        this.mockEmployees.splice(index, 1);
-        return of(void 0);
+        console.error('Error deleting employee:', error);
+        return throwError(() => error);
       })
     );
   }

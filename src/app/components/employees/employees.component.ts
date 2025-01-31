@@ -32,9 +32,10 @@ export class EmployeesComponent implements AfterViewInit {
   employees: Employee[] = [];
   loading = false;
   currentPage = 0;
-  pageSize = 8;
+  pageSize = 16;
+  totalElements = 0;
+  totalPages = 0;
   searchControl = new FormControl('');
-  private hasMoreEmployees = true;
   error: string | null = null;
 
   constructor(private employeeService: EmployeeService) {
@@ -53,13 +54,15 @@ export class EmployeesComponent implements AfterViewInit {
   private resetAndSearch(): void {
     this.employees = [];
     this.currentPage = 0;
-    this.hasMoreEmployees = true;
+    this.totalElements = 0;
+    this.totalPages = 0;
     this.error = null;
     this.loadEmployees();
   }
 
   private loadEmployees(): void {
-    if (!this.hasMoreEmployees || this.loading) return;
+    if (this.currentPage >= this.totalPages && this.totalPages !== 0) return;
+    if (this.loading) return;
 
     this.loading = true;
     this.error = null;
@@ -76,8 +79,10 @@ export class EmployeesComponent implements AfterViewInit {
       })
     ).subscribe(response => {
       this.employees = [...this.employees, ...response.content];
-      this.hasMoreEmployees = response.content.length === this.pageSize;
+      this.totalElements = response.totalElements;
+      this.totalPages = response.totalPages;
       this.currentPage = response.currentPage + 1;
+      this.pageSize = response.size;
       this.loading = false;
     });
   }
@@ -86,7 +91,7 @@ export class EmployeesComponent implements AfterViewInit {
     const element = event.target as HTMLElement;
     const nearBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 100;
 
-    if (nearBottom && !this.loading && !this.error) {
+    if (nearBottom && !this.loading && !this.error && this.currentPage < this.totalPages) {
       this.loadEmployees();
     }
   }
