@@ -27,20 +27,6 @@ const API_BASE_URL = 'http://localhost:8080/api';
 export class EmployeeService {
   private apiUrl = `${API_BASE_URL}/employees`;
   
-  // Mock data kept as fallback
-  private mockEmployees: Employee[] = [
-    { id: 1, fullName: 'John Doe', occupation: 'Software Engineer', createdAt: [2025, 1, 28, 8, 8, 2, 530895000] },
-    { id: 2, fullName: 'Jane Smith', occupation: 'Product Manager', createdAt: [2025, 1, 28, 8, 8, 2, 530895000] },
-    { id: 3, fullName: 'Michael Johnson', occupation: 'UX Designer', createdAt: [2025, 1, 28, 8, 8, 2, 530895000] },
-    { id: 4, fullName: 'Sarah Williams', occupation: 'Data Analyst', createdAt: [2025, 1, 28, 8, 8, 2, 530895000] },
-    { id: 5, fullName: 'Charlie Davis', occupation: 'DevOps Engineer', createdAt: [2025, 1, 28, 8, 8, 2, 530895000] },
-    { id: 6, fullName: 'Emily Davis', occupation: 'Project Manager', createdAt: [2025, 1, 28, 8, 8, 2, 530895000] },
-    { id: 7, fullName: 'David Miller', occupation: 'Frontend Developer', createdAt: [2025, 1, 28, 8, 8, 2, 530895000] },
-    { id: 8, fullName: 'Lisa Wilson', occupation: 'Backend Developer', createdAt: [2025, 1, 28, 8, 8, 2, 530895000] },
-    { id: 9, fullName: 'James Taylor', occupation: 'QA Engineer', createdAt: [2025, 1, 28, 8, 8, 2, 530895000] },
-    { id: 10, fullName: 'Emma Anderson', occupation: 'System Architect', createdAt: [2025, 1, 28, 8, 8, 2, 530895000] }
-  ];
-
   constructor(private http: HttpClient) {}
 
   getEmployees(
