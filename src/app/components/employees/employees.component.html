@@ -7,8 +7,7 @@
       type="text" 
       [formControl]="searchControl" 
       placeholder="Search by name or occupation"
-      class="search-input"
-      (click)="searchInput.focus()">
+      class="search-input">
   </div>
 
   <div class="employees-grid" #employeesGrid (scroll)="onScroll($event)">
@@ -16,7 +15,7 @@
       <mat-card-content>
         <div class="employee-content">
           <div class="employee-info">
-            <h3>{{employee.firstName}} {{employee.lastName}}</h3>
+            <h3>{{employee.fullName}}</h3>
             <p class="occupation">{{employee.occupation}}</p>
             <p class="employee-id">ID: {{employee.id}}</p>
           </div>
@@ -27,6 +26,11 @@
 
     <div *ngIf="loading" class="loading-spinner">
       <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+    <div *ngIf="error" class="error-message">
+      <mat-icon color="warn">error</mat-icon>
+      <p>{{error}}</p>
     </div>
   </div>
 </div>

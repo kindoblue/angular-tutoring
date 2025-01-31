@@ -6,9 +6,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Employee } from '../../interfaces/employee.interface';
-import { EmployeeService } from '../../services/employee.service';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { EmployeeService, EmployeeResponse, Employee } from '../../services/employee.service';
+import { debounceTime, distinctUntilChanged, catchError } from 'rxjs/operators';
+import { EMPTY } from 'rxjs';
 
 @Component({
   selector: 'app-employees',
@@ -35,6 +35,7 @@ export class EmployeesComponent implements AfterViewInit {
   pageSize = 8;
   searchControl = new FormControl('');
   private hasMoreEmployees = true;
+  error: string | null = null;
 
   constructor(private employeeService: EmployeeService) {
     this.searchControl.valueChanges.pipe(
@@ -53,6 +54,7 @@ export class EmployeesComponent implements AfterViewInit {
     this.employees = [];
     this.currentPage = 0;
     this.hasMoreEmployees = true;
+    this.error = null;
     this.loadEmployees();
   }
 
@@ -60,21 +62,23 @@ export class EmployeesComponent implements AfterViewInit {
     if (!this.hasMoreEmployees || this.loading) return;
 
     this.loading = true;
+    this.error = null;
+
     this.employeeService.getEmployees(
       this.searchControl.value || '',
       this.currentPage,
       this.pageSize
-    ).subscribe({
-      next: (result) => {
-        this.employees = [...this.employees, ...result.items];
-        this.hasMoreEmployees = result.items.length === this.pageSize;
-        this.currentPage++;
+    ).pipe(
+      catchError(error => {
+        this.error = error.message;
         this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading employees:', error);
-        this.loading = false;
-      }
+        return EMPTY;
+      })
+    ).subscribe(response => {
+      this.employees = [...this.employees, ...response.content];
+      this.hasMoreEmployees = response.content.length === this.pageSize;
+      this.currentPage = response.currentPage + 1;
+      this.loading = false;
     });
   }
 
@@ -82,7 +86,7 @@ export class EmployeesComponent implements AfterViewInit {
     const element = event.target as HTMLElement;
     const nearBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 100;
 
-    if (nearBottom && !this.loading) {
+    if (nearBottom && !this.loading && !this.error) {
       this.loadEmployees();
     }
   }
