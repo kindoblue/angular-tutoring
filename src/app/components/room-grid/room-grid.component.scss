@@ -1,64 +1,92 @@
 .room-grid {
-  background: var(--surface-container);
-  border-radius: var(--border-radius-lg);
-  padding: 1.5rem;
+  padding: 1rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 
   h2 {
     margin-bottom: 1.5rem;
     color: var(--on-surface);
+    font-size: 1.5rem;
+  }
+
+  .no-selection {
+    text-align: center;
+    color: var(--on-surface-variant);
+    font-size: 1.1rem;
+    margin-top: 2rem;
   }
 
   .rooms {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
+    gap: 1rem;
+    padding: 0.5rem;
+    overflow-y: auto;
+    flex: 1;
   }
 
   .room {
-    background: var(--surface);
-    border-radius: var(--border-radius-md);
-    padding: 1rem;
+    transition: box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1);
 
-    h3 {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-      color: var(--on-surface);
-
-      .room-number {
-        font-size: 0.875rem;
-        color: var(--on-surface-variant);
-      }
+    &:hover {
+      box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+                 0 8px 10px 1px rgba(0, 0, 0, 0.14),
+                 0 3px 14px 2px rgba(0, 0, 0, 0.12);
     }
 
-    .seats {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-      gap: 0.75rem;
+    .room-content {
+      padding: 1rem;
 
-      .seat {
-        aspect-ratio: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: var(--secondary-container);
-        color: var(--on-secondary-container);
-        border-radius: var(--border-radius-sm);
-        cursor: pointer;
-        transition: all 0.2s ease;
-        font-size: 0.875rem;
+      .room-info {
+        margin-bottom: 1rem;
 
-        &:hover {
-          background: var(--secondary-container-hover);
+        h3 {
+          margin: 0;
+          color: var(--on-surface);
+          font-size: 1.2rem;
         }
 
-        &.occupied {
-          background: var(--error-container);
-          color: var(--on-error-container);
+        .room-number {
+          margin: 0.5rem 0 0;
+          color: var(--primary);
+          font-weight: 500;
+        }
+      }
+
+      .seats {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background: var(--surface-container-low);
+        border-radius: 4px;
+
+        .seat {
+          aspect-ratio: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: var(--secondary-container);
+          color: var(--on-secondary-container);
+          border-radius: 4px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          font-size: 0.875rem;
+          font-weight: 500;
 
           &:hover {
-            background: var(--error-container-hover);
+            background: var(--secondary-container-hover);
+            transform: translateY(-1px);
+          }
+
+          &.occupied {
+            background: var(--error-container);
+            color: var(--on-error-container);
+
+            &:hover {
+              background: var(--error-container-hover);
+            }
           }
         }
       }
