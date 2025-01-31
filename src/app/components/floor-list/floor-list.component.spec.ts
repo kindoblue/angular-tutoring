@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { FloorListComponent } from './floor-list.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 
 describe('FloorListComponent', () => {
   let component: FloorListComponent;
@@ -8,9 +9,12 @@ describe('FloorListComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FloorListComponent]
-    })
-    .compileComponents();
+      imports: [
+        HttpClientTestingModule,
+        RouterTestingModule,
+        FloorListComponent
+      ]
+    }).compileComponents();
 
     fixture = TestBed.createComponent(FloorListComponent);
     component = fixture.componentInstance;

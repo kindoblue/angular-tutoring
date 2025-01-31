@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { RoomGridComponent } from './room-grid.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 
 describe('RoomGridComponent', () => {
   let component: RoomGridComponent;
@@ -8,9 +9,12 @@ describe('RoomGridComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RoomGridComponent]
-    })
-    .compileComponents();
+      imports: [
+        HttpClientTestingModule,
+        RouterTestingModule,
+        RoomGridComponent
+      ]
+    }).compileComponents();
 
     fixture = TestBed.createComponent(RoomGridComponent);
     component = fixture.componentInstance;

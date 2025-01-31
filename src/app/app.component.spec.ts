@@ -1,10 +1,18 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
+import { RouterTestingModule } from '@angular/router/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { MatToolbarModule } from '@angular/material/toolbar';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AppComponent],
+      imports: [
+        RouterTestingModule,
+        HttpClientTestingModule,
+        MatToolbarModule,
+        AppComponent
+      ]
     }).compileComponents();
   });
 
@@ -14,16 +22,16 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have the 'seat-management' title`, () => {
+  it(`should have the 'Office Management' title`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('seat-management');
+    expect(app.title).toEqual('Office Management');
   });
 
-  it('should render title', () => {
+  it('should render title in toolbar', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, seat-management');
+    expect(compiled.querySelector('mat-toolbar span')?.textContent).toContain('Office Management');
   });
 });
