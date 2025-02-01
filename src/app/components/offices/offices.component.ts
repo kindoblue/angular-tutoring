@@ -1,14 +1,14 @@
-import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { FloorListComponent } from '../floor-list/floor-list.component';
 import { RoomGridComponent } from '../room-grid/room-grid.component';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { FloorService } from '../../services/floor.service';
+import { Floor } from '../../interfaces/floor.interface';
 
 @Component({
   selector: 'app-offices',
@@ -17,49 +17,37 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
     CommonModule,
     MatCardModule,
     MatIconModule,
-    MatInputModule,
     MatFormFieldModule,
+    MatSelectModule,
     MatProgressSpinnerModule,
     ReactiveFormsModule,
-    FloorListComponent,
     RoomGridComponent
   ],
   templateUrl: './offices.component.html',
   styleUrls: ['./offices.component.scss']
 })
-export class OfficesComponent implements AfterViewInit {
-  @ViewChild('officesGrid') officesGrid!: ElementRef;
-  @ViewChild('searchInput') searchInput!: ElementRef;
-
+export class OfficesComponent {
   loading = false;
   error: string | null = null;
-  searchControl = new FormControl('');
+  selectedFloorControl = new FormControl<number | null>(null);
+  floors;
 
-  constructor() {
-    this.searchControl.valueChanges.pipe(
-      debounceTime(300),
-      distinctUntilChanged()
-    ).subscribe(value => {
-      // Handle search value changes
-      console.log('Search value:', value);
+  constructor(private floorService: FloorService) {
+    this.floors = floorService.floors;
+  }
+
+  ngOnInit() {
+    // Handle floor selection changes
+    this.selectedFloorControl.valueChanges.subscribe(floorNumber => {
+      if (floorNumber !== null) {
+        this.floorService.loadFloor(floorNumber);
+      }
     });
-  }
 
-  ngAfterViewInit() {
-    // Create a ResizeObserver to watch for container size changes
-    const resizeObserver = new ResizeObserver(() => {
-      this.checkLayout();
-    });
-    
-    // Start observing the offices grid
-    resizeObserver.observe(this.officesGrid.nativeElement);
-  }
-
-  private checkLayout(): void {
-    // Add any layout checks or adjustments needed
-  }
-
-  onScroll(event: Event): void {
-    // Handle scroll events if needed
+    // Set initial floor selection
+    const currentFloors = this.floors();
+    if (currentFloors.length > 0 && this.selectedFloorControl.value === null) {
+      this.selectedFloorControl.setValue(currentFloors[0].floorNumber);
+    }
   }
 }

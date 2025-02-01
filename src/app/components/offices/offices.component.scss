@@ -1,78 +1,31 @@
 .offices-container {
-  padding: 1rem;
+  padding: 2rem;
   display: flex;
   flex-direction: column;
   gap: 2rem;
 }
 
-.search-container {
-  .search-input {
+.floor-selector {
+  mat-form-field {
     width: 100%;
-    max-width: 500px;
-    padding: 0.75rem 1rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1rem;
-    outline: none;
-    transition: border-color 0.2s;
-
-    &:focus {
-      border-color: #1976d2;
-    }
-
-    &::placeholder {
-      color: rgba(0, 0, 0, 0.4);
-    }
+    max-width: 300px;
   }
 }
 
-.offices-grid {
-  display: grid;
-  grid-template-columns: minmax(300px, 1fr) minmax(300px, 2fr);
-  gap: 1rem;
-  max-height: calc(100vh - 450px);
-  overflow-y: auto;
-  padding: 0.5rem;
-  position: relative;
-}
-
-.office-card {
-  transition: box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  height: 100%;
-
-  &:hover {
-    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
-               0 8px 10px 1px rgba(0, 0, 0, 0.14),
-               0 3px 14px 2px rgba(0, 0, 0, 0.12);
-  }
-  
-  .office-content {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-
-    .office-info {
-      flex: 1;
-      
-      h3 {
-        margin: 0 0 1rem 0;
-        color: rgba(0, 0, 0, 0.87);
-        font-size: 1.2rem;
-      }
-    }
-  }
-
-  .floor-list, .room-grid {
-    height: calc(100vh - 550px);
-    overflow: auto;
-  }
+.room-container {
+  flex: 1;
+  height: calc(100vh - 250px);
+  overflow: hidden;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  padding: 1rem;
 }
 
 .loading-spinner {
   position: absolute;
-  bottom: 1rem;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
 }
 
 .error-message {
@@ -85,7 +38,6 @@
   border-radius: 4px;
   color: #d32f2f;
   margin: 1rem 0;
-  grid-column: 1 / -1;
 
   mat-icon {
     color: #d32f2f;
@@ -94,4 +46,4 @@
   p {
     margin: 0;
   }
-} 
+}
