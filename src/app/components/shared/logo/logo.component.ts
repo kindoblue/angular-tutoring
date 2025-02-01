@@ -10,5 +10,4 @@ import { CommonModule } from '@angular/common';
 })
 export class LogoComponent {
   @Input() size = 32;
-  @Input() color = 'currentColor';
-} 
+}
