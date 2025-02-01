@@ -32,7 +32,7 @@ export class EmployeesComponent implements AfterViewInit {
   employees: Employee[] = [];
   loading = false;
   currentPage = 0;
-  pageSize = 16;
+  pageSize = 24;
   totalElements = 0;
   totalPages = 0;
   searchControl = new FormControl('');
@@ -49,6 +49,14 @@ export class EmployeesComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     this.loadEmployees();
+    
+    // Create a ResizeObserver to watch for container size changes
+    const resizeObserver = new ResizeObserver(() => {
+      this.checkAndLoadMore();
+    });
+    
+    // Start observing the employees grid
+    resizeObserver.observe(this.employeesGrid.nativeElement);
   }
 
   private resetAndSearch(): void {
@@ -58,6 +66,16 @@ export class EmployeesComponent implements AfterViewInit {
     this.totalPages = 0;
     this.error = null;
     this.loadEmployees();
+  }
+
+  private checkAndLoadMore(): void {
+    const element = this.employeesGrid.nativeElement;
+    // Check if we have room to load more (content height less than container height)
+    const hasRoomForMore = element.scrollHeight <= element.clientHeight;
+
+    if (hasRoomForMore && !this.loading && !this.error && this.currentPage < this.totalPages) {
+      this.loadEmployees();
+    }
   }
 
   private loadEmployees(): void {
@@ -84,6 +102,9 @@ export class EmployeesComponent implements AfterViewInit {
       this.currentPage = response.currentPage + 1;
       this.pageSize = response.size;
       this.loading = false;
+      
+      // Check if we need to load more after the current batch is loaded
+      this.checkAndLoadMore();
     });
   }
 
