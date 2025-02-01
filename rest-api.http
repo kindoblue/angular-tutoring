@@ -30,7 +30,29 @@ Content-Type: application/json
 ### Delete Employee
 DELETE {{baseUrl}}/api/employees/1
 
+### Get Employee Seats
+GET {{baseUrl}}/api/employees/1/seats
+Accept: application/json
+
 ### Example Responses
+
+# GET /api/employees/{id}/seats
+# Response 200 OK
+[
+  {
+    "id": 1,
+    "seatNumber": "A101",
+    "createdAt": [2024, 1, 30, 13, 45, 30],
+    "occupied": true
+  },
+  {
+    "id": 2,
+    "seatNumber": "B205",
+    "createdAt": [2024, 1, 30, 13, 45, 30],
+    "occupied": true
+  }
+]
+
 
 # GET /api/employees
 # Response 200 OK

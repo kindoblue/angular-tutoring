@@ -11,7 +11,7 @@
   </div>
 
   <div class="employees-grid" #employeesGrid (scroll)="onScroll($event)">
-    <mat-card class="employee-card" *ngFor="let employee of employees">
+    <mat-card class="employee-card" *ngFor="let employee of employees" (click)="openSeatsDialog(employee)">
       <mat-card-content>
         <div class="employee-content">
           <div class="employee-info">

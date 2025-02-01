@@ -5,6 +5,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { EmployeeSeatsDialogComponent } from './employee-seats-dialog/employee-seats-dialog.component';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { EmployeeService, EmployeeResponse, Employee } from '../../services/employee.service';
 import { debounceTime, distinctUntilChanged, catchError } from 'rxjs/operators';
@@ -20,7 +22,8 @@ import { EMPTY } from 'rxjs';
     MatInputModule,
     MatFormFieldModule,
     MatProgressSpinnerModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatDialogModule
   ],
   templateUrl: './employees.component.html',
   styleUrls: ['./employees.component.scss']
@@ -38,7 +41,10 @@ export class EmployeesComponent implements AfterViewInit {
   searchControl = new FormControl('');
   error: string | null = null;
 
-  constructor(private employeeService: EmployeeService) {
+  constructor(
+    private employeeService: EmployeeService,
+    private dialog: MatDialog
+  ) {
     this.searchControl.valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged()
@@ -115,5 +121,12 @@ export class EmployeesComponent implements AfterViewInit {
     if (nearBottom && !this.loading && !this.error && this.currentPage < this.totalPages) {
       this.loadEmployees();
     }
+  }
+
+  openSeatsDialog(employee: Employee): void {
+    this.dialog.open(EmployeeSeatsDialogComponent, {
+      data: employee,
+      width: '500px'
+    });
   }
 }

@@ -1,10 +1,45 @@
 <div class="offices-container">
-  <header>
-    <h1>Offices</h1>
-    <p>View and manage office locations</p>
-  </header>
-  <main class="offices-layout">
-    <app-floor-list class="floor-list"></app-floor-list>
-    <app-room-grid class="room-grid"></app-room-grid>
-  </main>
+  <h1>Offices</h1>
+
+  <div class="search-container">
+    <input 
+      #searchInput
+      type="text" 
+      [formControl]="searchControl" 
+      placeholder="Search by office location"
+      class="search-input">
+  </div>
+
+  <div class="offices-grid" #officesGrid (scroll)="onScroll($event)">
+    <mat-card class="office-card">
+      <mat-card-content>
+        <div class="office-content">
+          <div class="office-info">
+            <h3>Floor List</h3>
+            <app-floor-list class="floor-list"></app-floor-list>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="office-card">
+      <mat-card-content>
+        <div class="office-content">
+          <div class="office-info">
+            <h3>Room Grid</h3>
+            <app-room-grid class="room-grid"></app-room-grid>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <div *ngIf="loading" class="loading-spinner">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+    <div *ngIf="error" class="error-message">
+      <mat-icon color="warn">error</mat-icon>
+      <p>{{error}}</p>
+    </div>
+  </div>
 </div> 

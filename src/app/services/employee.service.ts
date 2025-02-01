@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, of } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
+import { Seat } from '../interfaces/seat.interface';
 
 export interface Employee {
   id: number;
@@ -86,6 +87,16 @@ export class EmployeeService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
       catchError((error) => {
         console.error('Error deleting employee:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  getEmployeeSeats(employeeId: number): Observable<Seat[]> {
+    return this.http.get<Seat[]>(`${this.apiUrl}/${employeeId}/seats`).pipe(
+      retry(1),
+      catchError((error) => {
+        console.error('Error fetching employee seats:', error);
         return throwError(() => error);
       })
     );
