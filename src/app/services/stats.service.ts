@@ -51,12 +51,4 @@ export class StatsService {
 
     return this.stats$;
   }
-
-  // Method to force refresh the stats if needed
-  refreshStats(): Observable<Stats> {
-    // Clear the cache
-    this.stats$ = null;
-    // Get fresh data
-    return this.getStats();
-  }
 } 
