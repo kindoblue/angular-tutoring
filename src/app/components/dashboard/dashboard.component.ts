@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { StatsService, Stats } from '../../services/stats.service';
+import { DashboardService } from '../../services/dashboard.service';
+import { DashboardStats } from '../../interfaces/dashboard.interface';
 
 @Component({
   selector: 'app-dashboard',
@@ -18,16 +19,16 @@ import { StatsService, Stats } from '../../services/stats.service';
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
-  stats = signal<Stats | null>(null);
+  stats = signal<DashboardStats | null>(null);
 
-  constructor(private statsService: StatsService) {}
+  constructor(private dashboardService: DashboardService) {}
 
   ngOnInit(): void {
     this.loadStats();
   }
 
   private loadStats(): void {
-    this.statsService.getStats().subscribe(stats => {
+    this.dashboardService.getDashboardStats().subscribe(stats => {
       this.stats.set(stats);
     });
   }
