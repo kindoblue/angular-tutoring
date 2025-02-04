@@ -8,7 +8,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { EmployeeSeatsDialogComponent } from './employee-seats-dialog/employee-seats-dialog.component';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { EmployeeService, EmployeeResponse, Employee } from '../../services/employee.service';
+import { EmployeeService, Employee } from '../../services/employee.service';
 import { debounceTime, distinctUntilChanged, catchError } from 'rxjs/operators';
 import { EMPTY } from 'rxjs';
 
@@ -57,7 +57,7 @@ export class EmployeesComponent implements AfterViewInit {
     this.loadEmployees();
     
     // Create a ResizeObserver to watch for container size changes
-    const resizeObserver = new ResizeObserver((entries) => {
+    const resizeObserver = new ResizeObserver(() => {
       // Debounce the resize callback to prevent multiple rapid calls
       if (this.resizeTimeout) {
         window.clearTimeout(this.resizeTimeout);

@@ -1,25 +1,22 @@
-import { ComponentFixture, TestBed, fakeAsync, tick, discardPeriodicTasks } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { EmployeesComponent } from './employees.component';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MatDialog, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { of } from 'rxjs';
-import { ElementRef, ChangeDetectorRef } from '@angular/core';
-import { EmployeeSeatsDialogComponent } from './employee-seats-dialog/employee-seats-dialog.component';
+import { ElementRef } from '@angular/core';
 
 describe('EmployeesComponent', () => {
   let component: EmployeesComponent;
   let fixture: ComponentFixture<EmployeesComponent>;
   let httpMock: HttpTestingController;
   let dialogSpy: jasmine.SpyObj<MatDialog>;
-  let cdr: ChangeDetectorRef;
 
   beforeEach(async () => {
     // Mock ResizeObserver
     class MockResizeObserver implements ResizeObserver {
-      constructor(callback: ResizeObserverCallback) {}
       observe = jasmine.createSpy('observe');
       unobserve = jasmine.createSpy('unobserve');
       disconnect = jasmine.createSpy('disconnect');
@@ -57,7 +54,6 @@ describe('EmployeesComponent', () => {
     httpMock = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(EmployeesComponent);
     component = fixture.componentInstance;
-    cdr = fixture.debugElement.injector.get(ChangeDetectorRef);
 
     // Set up ViewChild before any change detection
     const mockGrid = document.createElement('div');

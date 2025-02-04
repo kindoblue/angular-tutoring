@@ -1,6 +1,3 @@
-import { Floor } from './floor.interface';
-import { Room } from './room.interface';
-
 export interface Seat {
   id: number;
   room: {
