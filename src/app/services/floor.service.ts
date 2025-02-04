@@ -106,7 +106,17 @@ export class FloorService {
     .subscribe({
       next: (floor) => {
         console.log('Received floor data:', floor);
-        this.selectedFloorSignal.set(floor);
+        // Sort rooms by roomNumber before setting the floor data
+        const sortedFloor = {
+          ...floor,
+          rooms: [...floor.rooms].sort((a, b) => {
+            // Convert room numbers to numbers for proper numeric sorting
+            const aNum = parseInt(a.roomNumber);
+            const bNum = parseInt(b.roomNumber);
+            return aNum - bNum;
+          })
+        };
+        this.selectedFloorSignal.set(sortedFloor);
       },
       error: (error) => {
         console.error('Error loading floor:', error);
