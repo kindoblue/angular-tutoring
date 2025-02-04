@@ -131,3 +131,14 @@
     }
   }
 }
+
+.dialog-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+  padding: 1rem 0;
+
+  button {
+    min-width: 150px;
+  }
+}

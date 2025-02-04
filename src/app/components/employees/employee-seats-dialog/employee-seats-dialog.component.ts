@@ -4,6 +4,7 @@ import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/materia
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { Router } from '@angular/router';
 import { Employee, EmployeeService } from '../../../services/employee.service';
 import { Seat } from '../../../interfaces/seat.interface';
 
@@ -28,6 +29,7 @@ export class EmployeeSeatsDialogComponent {
   constructor(
     private dialogRef: MatDialogRef<EmployeeSeatsDialogComponent>,
     private employeeService: EmployeeService,
+    private router: Router,
     @Inject(MAT_DIALOG_DATA) public employee: Employee
   ) {
     this.loadEmployeeSeats();
@@ -49,5 +51,15 @@ export class EmployeeSeatsDialogComponent {
 
   close(): void {
     this.dialogRef.close();
+  }
+
+  reserveSeat(): void {
+    this.dialogRef.close();
+    this.router.navigate(['/offices'], { 
+      queryParams: { 
+        employeeId: this.employee.id,
+        employeeName: this.employee.fullName
+      } 
+    });
   }
 }

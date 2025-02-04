@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FloorService } from '../../services/floor.service';
 import { Floor } from '../../interfaces/floor.interface';
@@ -19,6 +19,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
   styleUrls: ['./room-grid.component.scss']
 })
 export class RoomGridComponent {
+  @Input() floorNumber!: number;
+  @Output() seatSelected = new EventEmitter<number>();
   selectedFloor;
 
   constructor(private floorService: FloorService) {
@@ -26,6 +28,6 @@ export class RoomGridComponent {
   }
 
   onSeatClick(roomId: number, seatId: number) {
-    this.floorService.toggleSeatOccupancy(roomId, seatId);
+    this.seatSelected.emit(seatId);
   }
 }

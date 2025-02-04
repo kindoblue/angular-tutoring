@@ -2,6 +2,8 @@ import { Injectable, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Floor } from '../interfaces/floor.interface';
 import { catchError, retry, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
+import { Seat } from '../interfaces/seat.interface';
 
 /**
  * Service responsible for managing floor data and seat occupancy state.
@@ -138,5 +140,15 @@ export class FloorService {
 
       return { ...floor, rooms: updatedRooms };
     });
+  }
+
+  getSeatInfo(seatId: number): Observable<Seat> {
+    return this.http.get<Seat>(`${this.apiUrl}/seats/${seatId}`).pipe(
+      retry(1),
+      catchError((error) => {
+        console.error('Error fetching seat info:', error);
+        return throwError(() => error);
+      })
+    );
   }
 }
