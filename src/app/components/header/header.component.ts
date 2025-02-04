@@ -23,6 +23,6 @@ export class HeaderComponent {
     { path: '/dashboard', label: 'Dashboard' },
     { path: '/employees', label: 'Employees' },
     { path: '/offices', label: 'Offices' },
-    { path: '/floor-plans', label: 'Floor Plans' }
+    { path: '/floor-plans', label: 'Office assignments' }
   ];
 } 
