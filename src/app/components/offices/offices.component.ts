@@ -14,6 +14,8 @@ import { FloorService } from '../../services/floor.service';
 import { EmployeeService } from '../../services/employee.service';
 import { Floor } from '../../interfaces/floor.interface';
 import { SeatInfoDialogComponent } from './seat-info-dialog/seat-info-dialog.component';
+import { catchError } from 'rxjs/operators';
+import { EMPTY } from 'rxjs';
 
 @Component({
   selector: 'app-offices',
@@ -115,24 +117,25 @@ export class OfficesComponent implements OnInit {
           }
         });
     } else {
-      // Show seat info dialog
-      this.loading = true;
-      this.floorService.getSeatInfo(seatId).subscribe({
-        next: (seat) => {
-          this.loading = false;
-          this.dialog.open(SeatInfoDialogComponent, {
-            data: seat,
-            width: '400px'
-          });
-        },
-        error: (error: Error) => {
-          this.loading = false;
-          console.error('Error fetching seat info:', error);
+      // Show seat info dialog without triggering loading state
+      this.floorService.getSeatInfo(seatId).pipe(
+        catchError((error: Error) => {
           this.snackBar.open(
             `Failed to fetch seat information: ${error.message}`,
             'Close',
             { duration: 5000 }
           );
+          return EMPTY;
+        })
+      ).subscribe(seat => {
+        if (seat) {
+          this.dialog.open(SeatInfoDialogComponent, {
+            data: seat,
+            width: '400px',
+            panelClass: 'seat-info-dialog',
+            autoFocus: false,
+            restoreFocus: false
+          });
         }
       });
     }
