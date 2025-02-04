@@ -54,6 +54,7 @@ export class OfficesComponent implements OnInit {
           id: parseInt(params['employeeId']),
           name: params['employeeName']
         };
+        console.log('Employee context set:', this.reservingForEmployee);
       }
     });
 
@@ -72,21 +73,30 @@ export class OfficesComponent implements OnInit {
   }
 
   onSeatSelected(seatId: number) {
+    console.log('Seat selected:', seatId);
+    console.log('Current employee context:', this.reservingForEmployee);
+    
     if (this.reservingForEmployee) {
       this.loading = true;
+      console.log('Making API call to assign seat:', {
+        employeeId: this.reservingForEmployee.id,
+        seatId: seatId
+      });
+      
       this.employeeService.assignSeat(this.reservingForEmployee.id, seatId)
         .subscribe({
           next: () => {
+            console.log('Seat assignment successful');
             this.snackBar.open(
               `Seat assigned to ${this.reservingForEmployee?.name}`,
               'Close',
               { duration: 3000 }
             );
             this.loading = false;
-            // Clear the reservation context
             this.reservingForEmployee = null;
           },
           error: (error) => {
+            console.error('Seat assignment failed:', error);
             this.snackBar.open(
               `Failed to assign seat: ${error.message}`,
               'Close',
@@ -95,6 +105,8 @@ export class OfficesComponent implements OnInit {
             this.loading = false;
           }
         });
+    } else {
+      console.log('No employee context found for seat assignment');
     }
   }
 }

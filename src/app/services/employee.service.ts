@@ -103,7 +103,12 @@ export class EmployeeService {
   }
 
   assignSeat(employeeId: number, seatId: number): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/${employeeId}/assign-seat/${seatId}`, {});
+    return this.http.put<void>(`${this.apiUrl}/${employeeId}/assign-seat/${seatId}`, {}).pipe(
+      catchError((error) => {
+        console.error('Error assigning seat:', error);
+        return throwError(() => error);
+      })
+    );
   }
 
   private handleError(error: HttpErrorResponse) {
