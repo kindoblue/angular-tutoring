@@ -8,10 +8,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { RoomGridComponent } from '../room-grid/room-grid.component';
 import { FloorService } from '../../services/floor.service';
 import { EmployeeService } from '../../services/employee.service';
 import { Floor } from '../../interfaces/floor.interface';
+import { SeatInfoDialogComponent } from './seat-info-dialog/seat-info-dialog.component';
 
 @Component({
   selector: 'app-offices',
@@ -24,6 +26,7 @@ import { Floor } from '../../interfaces/floor.interface';
     MatSelectModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
+    MatDialogModule,
     ReactiveFormsModule,
     RoomGridComponent
   ],
@@ -41,7 +44,8 @@ export class OfficesComponent implements OnInit {
     private floorService: FloorService,
     private employeeService: EmployeeService,
     private route: ActivatedRoute,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
   ) {
     this.floors = floorService.floors;
   }
@@ -90,8 +94,13 @@ export class OfficesComponent implements OnInit {
             this.snackBar.open(
               `Seat assigned to ${this.reservingForEmployee?.name}`,
               'Close',
-              { duration: 3000 }
+              { duration: 5000 }
             );
+            // Reload the current floor to update the seat status
+            const currentFloor = this.selectedFloorControl.value;
+            if (currentFloor !== null) {
+              this.floorService.loadFloor(currentFloor);
+            }
             this.loading = false;
             this.reservingForEmployee = null;
           },
@@ -100,13 +109,32 @@ export class OfficesComponent implements OnInit {
             this.snackBar.open(
               `Failed to assign seat: ${error.message}`,
               'Close',
-              { duration: 3000 }
+              { duration: 5000 }
             );
             this.loading = false;
           }
         });
     } else {
-      console.log('No employee context found for seat assignment');
+      // Show seat info dialog
+      this.loading = true;
+      this.floorService.getSeatInfo(seatId).subscribe({
+        next: (seat) => {
+          this.loading = false;
+          this.dialog.open(SeatInfoDialogComponent, {
+            data: seat,
+            width: '400px'
+          });
+        },
+        error: (error: Error) => {
+          this.loading = false;
+          console.error('Error fetching seat info:', error);
+          this.snackBar.open(
+            `Failed to fetch seat information: ${error.message}`,
+            'Close',
+            { duration: 5000 }
+          );
+        }
+      });
     }
   }
 }
