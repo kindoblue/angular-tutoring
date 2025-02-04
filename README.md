@@ -46,13 +46,28 @@ ng test
 
 ## Running end-to-end tests
 
-For end-to-end (e2e) testing, run:
+This project uses Playwright for end-to-end testing. Playwright provides a robust framework for testing web applications across multiple browsers (Chromium, Firefox, and WebKit).
+
+To run the end-to-end tests, you have several options:
 
 ```bash
-ng e2e
+# Run all tests headlessly (CI mode)
+npm run test:e2e
+
+# Run tests with Playwright's UI mode (great for debugging)
+npm run test:e2e:ui
+
+# Run tests in debug mode with step-by-step execution
+npm run test:e2e:debug
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+The test files are located in the `e2e` directory. When you run the tests:
+- Playwright will automatically start the Angular development server
+- Execute tests across all configured browsers (Chrome, Firefox, and Safari)
+- Generate a detailed HTML report with test results
+- Capture screenshots on test failures
+
+For more information on using Playwright, visit the [Playwright Documentation](https://playwright.dev/docs/intro).
 
 ## Additional Resources
 
