@@ -104,6 +104,16 @@
           font-weight: 500;
         }
 
+        .employee-name {
+          cursor: pointer;
+          color: #1976d2;
+          text-decoration: underline;
+
+          &:hover {
+            color: #1565c0;
+          }
+        }
+
         .vacant {
           color: rgba(0, 0, 0, 0.5);
           font-style: italic;

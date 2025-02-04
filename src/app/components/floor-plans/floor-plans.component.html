@@ -18,12 +18,7 @@
       <mat-spinner diameter="40"></mat-spinner>
     </div>
 
-    <div *ngIf="error" class="error-message">
-      <mat-icon>error</mat-icon>
-      <p>{{error}}</p>
-    </div>
-
-    <div *ngIf="!loading && !error && selectedFloor()" class="rooms-grid">
+    <div *ngIf="!loading && selectedFloor()" class="rooms-grid">
       <mat-card *ngFor="let room of selectedFloor()?.rooms" class="room-card">
         <mat-card-content>
           <div class="room-header">
@@ -42,7 +37,8 @@
             <div *ngFor="let seat of room.seats" class="seat-info">
               <div class="seat-number">{{seat.seatNumber}}</div>
               <div [class.occupied]="seat.occupied" class="employee-info">
-                <span *ngIf="seat.employee">
+                <span *ngIf="seat.employee" class="employee-name" 
+                      (click)="onEmployeeClick($event, seat.employee.id, seat.employee.fullName, seat.id)">
                   {{seat.employee.fullName}} - {{seat.employee.occupation}}
                 </span>
                 <span *ngIf="!seat.employee" class="vacant">

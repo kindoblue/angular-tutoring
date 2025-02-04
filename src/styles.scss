@@ -7,3 +7,12 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 .mat-mdc-card {
   --mdc-elevated-card-container-color: white;
 }
+
+.error-snackbar {
+  background: #d32f2f;
+  color: white;
+
+  .mat-simple-snackbar-action {
+    color: white;
+  }
+}

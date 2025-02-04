@@ -9,6 +9,10 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { FloorService } from '../../services/floor.service';
 import { MatButtonModule } from '@angular/material/button';
 import { jsPDF } from 'jspdf';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { UnassignSeatDialogComponent } from '../unassign-seat-dialog/unassign-seat-dialog.component';
+import { HttpClient } from '@angular/common/http';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-floor-plans',
@@ -21,7 +25,9 @@ import { jsPDF } from 'jspdf';
     MatSelectModule,
     MatProgressSpinnerModule,
     ReactiveFormsModule,
-    MatButtonModule
+    MatButtonModule,
+    MatDialogModule,
+    MatSnackBarModule
   ],
   templateUrl: './floor-plans.component.html',
   styleUrls: ['./floor-plans.component.scss']
@@ -33,13 +39,59 @@ export class FloorPlansComponent implements OnInit {
   floors;
   selectedFloor;
 
-  constructor(private floorService: FloorService) {
+  constructor(
+    private floorService: FloorService,
+    private dialog: MatDialog,
+    private http: HttpClient,
+    private snackBar: MatSnackBar
+  ) {
     this.floors = floorService.floors;
     this.selectedFloor = floorService.selectedFloor;
   }
 
   isRoomEmpty(room: any): boolean {
     return !room.seats.some((seat: any) => seat.employee);
+  }
+
+  onEmployeeClick(event: Event, employeeId: number, employeeName: string, seatId: number) {
+    event.stopPropagation();
+    const dialogRef = this.dialog.open(UnassignSeatDialogComponent, {
+      width: '400px',
+      data: { employeeId, employeeName }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.unassignSeat(employeeId, seatId);
+      }
+    });
+  }
+
+  private unassignSeat(employeeId: number, seatId: number) {
+    this.http.delete(`http://localhost:8080/api/employees/${employeeId}/unassign-seat/${seatId}`)
+      .subscribe({
+        next: () => {
+          // Refresh the floor data
+          const currentFloor = this.selectedFloorControl.value;
+          if (currentFloor !== null) {
+            this.floorService.loadFloor(currentFloor);
+          }
+          this.snackBar.open('Seat unassigned successfully', 'Close', {
+            duration: 3000,
+            horizontalPosition: 'end',
+            verticalPosition: 'top'
+          });
+        },
+        error: (error) => {
+          console.error('Error unassigning seat:', error);
+          this.snackBar.open('Failed to unassign seat', 'Close', {
+            duration: 5000,
+            horizontalPosition: 'end',
+            verticalPosition: 'top',
+            panelClass: ['error-snackbar']
+          });
+        }
+      });
   }
 
   ngOnInit() {
