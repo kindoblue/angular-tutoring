@@ -1,14 +1,16 @@
 <div class="employees-container">
   <h1>Employees</h1>
 
-  <div class="search-container">
-    <input 
-      #searchInput
-      type="text" 
-      [formControl]="searchControl" 
-      placeholder="Search by name or occupation"
-      class="search-input">
-  </div>
+  <mat-card class="search-container">
+    <mat-form-field>
+      <mat-label>Search by name or occupation</mat-label>
+      <input matInput
+        #searchInput
+        [formControl]="searchControl"
+        placeholder="Type to search...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </mat-card>
 
   <div class="employees-grid" #employeesGrid (scroll)="onScroll($event)">
     <mat-card class="employee-card" *ngFor="let employee of employees" (click)="openSeatsDialog(employee)">
