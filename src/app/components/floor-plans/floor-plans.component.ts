@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -7,6 +8,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { FloorService } from '../../services/floor.service';
+import { MatButtonModule } from '@angular/material/button';
+import { jsPDF } from 'jspdf';
 
 @Component({
   selector: 'app-floor-plans',
@@ -18,7 +21,8 @@ import { FloorService } from '../../services/floor.service';
     MatFormFieldModule,
     MatSelectModule,
     MatProgressSpinnerModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatButtonModule
   ],
   template: `
     <div class="floor-plans-container">
@@ -50,8 +54,14 @@ import { FloorService } from '../../services/floor.service';
           <mat-card *ngFor="let room of selectedFloor()?.rooms" class="room-card">
             <mat-card-content>
               <div class="room-header">
-                <h3>{{room.name}}</h3>
-                <p class="room-number">Room {{room.roomNumber}}</p>
+                <div class="room-info">
+                  <h3>{{room.name}}</h3>
+                  <p class="room-number">Room {{room.roomNumber}}</p>
+                </div>
+                <button mat-raised-button color="primary" (click)="printRoomLabel(room)">
+                  <mat-icon>print</mat-icon>
+                  Print label
+                </button>
               </div>
               <div class="employees-list">
                 <div *ngFor="let seat of room.seats" class="seat-info">
@@ -127,17 +137,80 @@ import { FloorService } from '../../services/floor.service';
 
     .room-card {
       .room-header {
-        margin-bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
 
-        h3 {
-          margin: 0;
-          color: rgba(0, 0, 0, 0.87);
+    .floor-selector {
+      padding: 1.5rem;
+
+      mat-form-field {
+        width: 100%;
+        max-width: 300px;
+      }
+    }
+
+    .floor-content {
+      position: relative;
+      min-height: 200px;
+    }
+
+    .loading-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .error-message {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem;
+      background-color: #fdecea;
+      border-radius: 4px;
+      color: #d32f2f;
+
+      mat-icon {
+        color: #d32f2f;
+      }
+
+      p {
+        margin: 0;
+      }
+    }
+
+    .rooms-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+
+    .room-card {
+      .room-header {
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+
+        .room-info {
+          h3 {
+            margin: 0;
+            color: rgba(0, 0, 0, 0.87);
+          }
+  
+          .room-number {
+            margin: 0.25rem 0 0 0;
+            color: #1976d2;
+            font-weight: 500;
+          }
         }
 
-        .room-number {
-          margin: 0.25rem 0 0 0;
-          color: #1976d2;
-          font-weight: 500;
+        button {
+          mat-icon {
+            margin-right: 8px;
+          }
         }
       }
 
@@ -206,5 +279,39 @@ export class FloorPlansComponent implements OnInit {
     if (currentFloors.length > 0 && this.selectedFloorControl.value === null) {
       this.selectedFloorControl.setValue(currentFloors[0].floorNumber);
     }
+  }
+
+  printRoomLabel(room: any) {
+    // Create a new PDF document
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    let yPosition = 20;
+
+    // Add room header
+    doc.setFontSize(20);
+    doc.text(`${room.name} (Room ${room.roomNumber})`, pageWidth / 2, yPosition, { align: 'center' });
+    
+    // Add floor name
+    yPosition += 10;
+    doc.setFontSize(14);
+    const floor = this.selectedFloor();
+    if (floor) {
+      doc.text(floor.name, pageWidth / 2, yPosition, { align: 'center' });
+    }
+
+    // Add employees list
+    yPosition += 20;
+    doc.setFontSize(12);
+    
+    room.seats.forEach((seat: any) => {
+      if (seat.employee) {
+        const text = `${seat.seatNumber}: ${seat.employee.fullName} - ${seat.employee.occupation}`;
+        doc.text(text, 20, yPosition);
+        yPosition += 10;
+      }
+    });
+
+    // Save the PDF
+    doc.save(`room-${room.roomNumber}-label.pdf`);
   }
 } 
