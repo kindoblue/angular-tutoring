@@ -41,5 +41,12 @@
         </div>
       </div>
     </div>
+
+    <div *ngIf="!loading && !error" class="dialog-actions">
+      <button mat-raised-button color="primary" (click)="reserveSeat()">
+        <mat-icon>add</mat-icon>
+        Reserve Seat
+      </button>
+    </div>
   </div>
 </div>

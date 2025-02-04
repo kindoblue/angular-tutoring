@@ -1,45 +1,58 @@
 .offices-container {
-  padding: 1rem;
+  padding: 2rem;
   display: flex;
   flex-direction: column;
   gap: 2rem;
 }
 
 .floor-selector {
+  padding: 1.5rem;
+
+  .reservation-context {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background-color: #e3f2fd;
+    border-radius: 4px;
+    color: #1976d2;
+
+    mat-icon {
+      color: #1976d2;
+    }
+
+    span {
+      font-weight: 500;
+    }
+  }
+
   mat-form-field {
     width: 100%;
-    max-width: 500px;
+    max-width: 300px;
   }
 }
 
-.room-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1rem;
-  max-height: calc(100vh - 450px);
-  overflow-y: auto;
-  padding: 0.5rem;
+.floor-content {
   position: relative;
+  min-height: 200px;
 }
 
-.loading-spinner {
+.loading-container {
   position: absolute;
-  bottom: 1rem;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
 }
 
 .error-message {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 0.5rem;
   padding: 1rem;
   background-color: #fdecea;
   border-radius: 4px;
   color: #d32f2f;
-  margin: 1rem 0;
-  grid-column: 1 / -1;
 
   mat-icon {
     color: #d32f2f;

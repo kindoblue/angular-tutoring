@@ -102,6 +102,10 @@ export class EmployeeService {
     );
   }
 
+  assignSeat(employeeId: number, seatId: number): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/${employeeId}/assign-seat/${seatId}`, {});
+  }
+
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'An error occurred';
     
