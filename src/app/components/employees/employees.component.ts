@@ -57,13 +57,21 @@ export class EmployeesComponent implements AfterViewInit {
     this.loadEmployees();
     
     // Create a ResizeObserver to watch for container size changes
-    const resizeObserver = new ResizeObserver(() => {
-      this.checkAndLoadMore();
+    const resizeObserver = new ResizeObserver((entries) => {
+      // Debounce the resize callback to prevent multiple rapid calls
+      if (this.resizeTimeout) {
+        window.clearTimeout(this.resizeTimeout);
+      }
+      this.resizeTimeout = window.setTimeout(() => {
+        this.checkAndLoadMore();
+      }, 100);
     });
     
     // Start observing the employees grid
     resizeObserver.observe(this.employeesGrid.nativeElement);
   }
+
+  private resizeTimeout: number | null = null;
 
   private resetAndSearch(): void {
     this.employees = [];
@@ -75,12 +83,22 @@ export class EmployeesComponent implements AfterViewInit {
   }
 
   private checkAndLoadMore(): void {
+    if (!this.employeesGrid) return;
+    
     const element = this.employeesGrid.nativeElement;
-    // Check if we have room to load more (content height less than container height)
-    const hasRoomForMore = element.scrollHeight <= element.clientHeight;
-
-    if (hasRoomForMore && !this.loading && !this.error && this.currentPage < this.totalPages) {
-      this.loadEmployees();
+    // Add a small buffer to account for rounding differences across browsers
+    const hasRoomForMore = element.scrollHeight <= (element.clientHeight + 1);
+    
+    // Only load more if we have room, not currently loading, no errors, and more pages available
+    if (hasRoomForMore && 
+        !this.loading && 
+        !this.error && 
+        this.currentPage < this.totalPages && 
+        this.employees.length > 0) {
+      // Add a small delay to ensure DOM has settled
+      setTimeout(() => {
+        this.loadEmployees();
+      }, 0);
     }
   }
 
