@@ -24,22 +24,10 @@ export class DashboardComponent implements OnInit {
   constructor(private dashboardService: DashboardService) {}
 
   ngOnInit(): void {
-    this.loadDashboardStats();
+    this.loadStats();
   }
 
-  maxOffices(): number {
-    return Math.max(...(this.stats()?.officesPerFloor.map(f => f.officeCount) || [0]));
-  }
-
-  maxSeats(): number {
-    return Math.max(...(this.stats()?.seatsPerFloor.map(f => f.seatCount) || [0]));
-  }
-
-  getSeatsForFloor(floorNumber: number): number {
-    return this.stats()?.seatsPerFloor.find(f => f.floorNumber === floorNumber)?.seatCount || 0;
-  }
-
-  private loadDashboardStats(): void {
+  private loadStats(): void {
     this.dashboardService.getDashboardStats().subscribe(stats => {
       this.stats.set(stats);
     });
