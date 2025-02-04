@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -58,7 +57,9 @@ import { jsPDF } from 'jspdf';
                   <h3>{{room.name}}</h3>
                   <p class="room-number">Room {{room.roomNumber}}</p>
                 </div>
-                <button mat-raised-button color="primary" (click)="printRoomLabel(room)">
+                <button mat-raised-button color="primary" 
+                        (click)="printRoomLabel(room)"
+                        [disabled]="isRoomEmpty(room)">
                   <mat-icon>print</mat-icon>
                   Print label
                 </button>
@@ -137,58 +138,6 @@ import { jsPDF } from 'jspdf';
 
     .room-card {
       .room-header {
-      display: flex;
-      flex-direction: column;
-      gap: 2rem;
-    }
-
-    .floor-selector {
-      padding: 1.5rem;
-
-      mat-form-field {
-        width: 100%;
-        max-width: 300px;
-      }
-    }
-
-    .floor-content {
-      position: relative;
-      min-height: 200px;
-    }
-
-    .loading-container {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    .error-message {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 1rem;
-      background-color: #fdecea;
-      border-radius: 4px;
-      color: #d32f2f;
-
-      mat-icon {
-        color: #d32f2f;
-      }
-
-      p {
-        margin: 0;
-      }
-    }
-
-    .rooms-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1rem;
-    }
-
-    .room-card {
-      .room-header {
         margin-bottom: 1rem;
         display: flex;
         justify-content: space-between;
@@ -199,7 +148,7 @@ import { jsPDF } from 'jspdf';
             margin: 0;
             color: rgba(0, 0, 0, 0.87);
           }
-  
+
           .room-number {
             margin: 0.25rem 0 0 0;
             color: #1976d2;
@@ -235,7 +184,7 @@ import { jsPDF } from 'jspdf';
 
           .employee-info {
             flex: 1;
-            
+
             &.occupied {
               color: #1976d2;
               font-weight: 500;
@@ -261,6 +210,10 @@ export class FloorPlansComponent implements OnInit {
   constructor(private floorService: FloorService) {
     this.floors = floorService.floors;
     this.selectedFloor = floorService.selectedFloor;
+  }
+
+  isRoomEmpty(room: any): boolean {
+    return !room.seats.some((seat: any) => seat.employee);
   }
 
   ngOnInit() {
