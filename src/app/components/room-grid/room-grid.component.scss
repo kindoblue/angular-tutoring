@@ -67,7 +67,6 @@
 
         .seat {
           width: 60px;
-          height: 60px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -79,7 +78,6 @@
           transition: all 0.2s ease;
           font-size: 0.875rem;
           font-weight: 500;
-          padding: 1rem;
 
           &:hover {
             background: #bbdefb;
