@@ -12,7 +12,6 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { RoomGridComponent } from '../room-grid/room-grid.component';
 import { FloorService } from '../../services/floor.service';
 import { EmployeeService } from '../../services/employee.service';
-import { Floor } from '../../interfaces/floor.interface';
 import { SeatInfoDialogComponent } from './seat-info-dialog/seat-info-dialog.component';
 import { catchError } from 'rxjs/operators';
 import { EMPTY } from 'rxjs';

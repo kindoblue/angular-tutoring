@@ -13,6 +13,9 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { UnassignSeatDialogComponent } from '../unassign-seat-dialog/unassign-seat-dialog.component';
 import { HttpClient } from '@angular/common/http';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { Floor } from '../../interfaces/floor.interface';
+import { Room } from '../../interfaces/room.interface';
+import { Signal } from '@angular/core';
 
 @Component({
   selector: 'app-floor-plans',
@@ -36,8 +39,8 @@ export class FloorPlansComponent implements OnInit {
   loading = false;
   error: string | null = null;
   selectedFloorControl = new FormControl<number | null>(null);
-  floors;
-  selectedFloor;
+  floors: Signal<Floor[]>;
+  selectedFloor: Signal<Floor | null>;
 
   constructor(
     private floorService: FloorService,
@@ -49,11 +52,11 @@ export class FloorPlansComponent implements OnInit {
     this.selectedFloor = floorService.selectedFloor;
   }
 
-  isRoomEmpty(room: any): boolean {
-    return !room.seats.some((seat: any) => seat.employee);
+  isRoomEmpty(room: Room): boolean {
+    return !room.seats.some(seat => seat.occupied);
   }
 
-  onEmployeeClick(event: Event, employeeId: number, employeeName: string, seatId: number) {
+  onEmployeeClick(event: Event, employeeId: number, employeeName: string, seatId: number): void {
     event.stopPropagation();
     const dialogRef = this.dialog.open(UnassignSeatDialogComponent, {
       width: '400px',
@@ -67,7 +70,7 @@ export class FloorPlansComponent implements OnInit {
     });
   }
 
-  private unassignSeat(employeeId: number, seatId: number) {
+  private unassignSeat(employeeId: number, seatId: number): void {
     this.http.delete(`http://localhost:8080/api/employees/${employeeId}/unassign-seat/${seatId}`)
       .subscribe({
         next: () => {
@@ -94,7 +97,7 @@ export class FloorPlansComponent implements OnInit {
       });
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     // Handle floor selection changes
     this.selectedFloorControl.valueChanges.subscribe(floorNumber => {
       if (floorNumber !== null) {
@@ -112,7 +115,7 @@ export class FloorPlansComponent implements OnInit {
     }
   }
 
-  printRoomLabel(room: any) {
+  printRoomLabel(room: Room): void {
     // Create a new PDF document
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -134,7 +137,7 @@ export class FloorPlansComponent implements OnInit {
     yPosition += 20;
     doc.setFontSize(12);
     
-    room.seats.forEach((seat: any) => {
+    room.seats.forEach(seat => {
       if (seat.employee) {
         const text = `${seat.seatNumber}: ${seat.employee.fullName} - ${seat.employee.occupation}`;
         doc.text(text, 20, yPosition);

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError, of } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
 import { Seat } from '../interfaces/seat.interface';
 
@@ -9,7 +9,7 @@ export interface Employee {
   fullName: string;
   occupation: string;
   createdAt: number[];
-  seats?: any[]; // Adding seats as it's present in the API response
+  seats: Seat[];
 }
 
 export interface EmployeeResponse {
@@ -31,9 +31,9 @@ export class EmployeeService {
   constructor(private http: HttpClient) {}
 
   getEmployees(
-    searchTerm: string = '',
-    pageIndex: number = 0,
-    pageSize: number = 5
+    searchTerm = '',
+    pageIndex = 0,
+    pageSize = 5
   ): Observable<EmployeeResponse> {
     let params = new HttpParams()
       .set('page', pageIndex.toString())

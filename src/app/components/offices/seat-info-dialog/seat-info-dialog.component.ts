@@ -4,7 +4,6 @@ import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/materia
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { Employee } from '../../../services/employee.service';
 import { Seat } from '../../../interfaces/seat.interface';
 
 @Component({
