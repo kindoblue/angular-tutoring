@@ -1,0 +1,53 @@
+// Breakpoints
+$breakpoint-small: 576px;
+$breakpoint-medium: 768px;
+$breakpoint-large: 992px;
+$breakpoint-xlarge: 1200px;
+
+// Colors
+$primary: #1976d2;
+$primary-light: #4791db;
+$primary-dark: #115293;
+
+$error: #d32f2f;
+$error-light: #ef5350;
+$error-background: #fdecea;
+
+$text-primary: rgba(0, 0, 0, 0.87);
+$text-secondary: rgba(0, 0, 0, 0.6);
+$text-disabled: rgba(0, 0, 0, 0.38);
+
+// Typography
+$font-size-base: 1rem;
+$font-size-sm: 0.875rem;
+$font-size-xs: 0.75rem;
+$font-size-lg: 1.25rem;
+$font-size-xl: 1.5rem;
+$font-size-xxl: 2rem;
+
+// Spacing
+$spacing-unit: 0.25rem;
+$spacing-xs: $spacing-unit;
+$spacing-sm: $spacing-unit * 2;
+$spacing-md: $spacing-unit * 4;
+$spacing-lg: $spacing-unit * 6;
+$spacing-xl: $spacing-unit * 8;
+
+// Layout
+$container-padding-sm: $spacing-md;
+$container-padding-md: $spacing-lg;
+$container-padding-lg: $spacing-xl;
+
+$grid-gap-sm: $spacing-sm;
+$grid-gap-md: $spacing-md;
+$grid-gap-lg: $spacing-lg;
+
+// Transitions
+$transition-duration: 0.2s;
+$transition-timing: ease;
+
+// Z-index
+$z-index-drawer: 1000;
+$z-index-modal: 1300;
+$z-index-snackbar: 1400;
+$z-index-tooltip: 1500; 

@@ -1,0 +1,124 @@
+@use 'sass:math';
+@use 'sass:meta';
+@use 'variables' as v;
+
+// Media query mixins
+@mixin for-phone-only {
+  @media (max-width: (v.$breakpoint-small - 1)) { @content; }
+}
+
+@mixin for-tablet-portrait-up {
+  @media (min-width: v.$breakpoint-small) { @content; }
+}
+
+@mixin for-tablet-landscape-up {
+  @media (min-width: v.$breakpoint-medium) { @content; }
+}
+
+@mixin for-desktop-up {
+  @media (min-width: v.$breakpoint-large) { @content; }
+}
+
+@mixin for-big-desktop-up {
+  @media (min-width: v.$breakpoint-xlarge) { @content; }
+}
+
+// Print styles
+@mixin for-print {
+  @media print { @content; }
+}
+
+// Dark mode
+@mixin for-dark-mode {
+  @media (prefers-color-scheme: dark) { @content; }
+}
+
+// High contrast mode
+@mixin for-high-contrast {
+  @media (forced-colors: active) { @content; }
+}
+
+// Reduced motion
+@mixin for-reduced-motion {
+  @media (prefers-reduced-motion: reduce) { @content; }
+}
+
+// Touch device optimization
+@mixin for-touch-device {
+  @media (hover: none) and (pointer: coarse) { @content; }
+}
+
+// Layout mixins
+@mixin responsive-container {
+  padding: v.$container-padding-sm;
+  width: 100%;
+  margin: 0 auto;
+
+  @include for-tablet-portrait-up {
+    padding: v.$container-padding-md;
+  }
+
+  @include for-tablet-landscape-up {
+    padding: v.$container-padding-lg;
+  }
+}
+
+@mixin responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: v.$grid-gap-sm;
+
+  @include for-tablet-portrait-up {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: v.$grid-gap-md;
+  }
+
+  @include for-desktop-up {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: v.$grid-gap-lg;
+  }
+}
+
+// Typography mixins
+@mixin responsive-font-size($min-size, $max-size) {
+  font-size: $min-size;
+
+  @include for-tablet-portrait-up {
+    font-size: calc(#{$min-size} + #{strip-unit($max-size - $min-size)} * ((100vw - #{v.$breakpoint-small}) / #{strip-unit(v.$breakpoint-xlarge - v.$breakpoint-small)}));
+  }
+
+  @include for-big-desktop-up {
+    font-size: $max-size;
+  }
+}
+
+// Utility mixins
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin elevation($level) {
+  @if $level == 1 {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  } @else if $level == 2 {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  } @else if $level == 3 {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Helper function to strip units
+@function strip-unit($number) {
+  @if meta.type-of($number) == 'number' and not math.is-unitless($number) {
+    @return math.div($number, ($number * 0 + 1));
+  }
+  @return $number;
+} 

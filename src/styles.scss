@@ -1,18 +1,156 @@
 /* You can add global styles to this file, and also import other style files */
 @use '@angular/material' as mat;
+@use 'styles/variables' as v;
+@use 'styles/mixins' as m;
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+// Reset and base styles
+html {
+  height: 100%;
+  box-sizing: border-box;
+  font-size: 16px;
 
+  @include m.for-tablet-landscape-up {
+    font-size: 18px;
+  }
+}
+
+body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  line-height: 1.5;
+  color: v.$text-primary;
+  background-color: #f5f5f5;
+
+  @include m.for-reduced-motion {
+    * {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+// Global container styles
+.container {
+  @include m.responsive-container;
+}
+
+// Global grid styles
+.grid {
+  @include m.responsive-grid;
+}
+
+// Typography styles
+h1 {
+  @include m.responsive-font-size(v.$font-size-xl, v.$font-size-xxl);
+  
+  & {
+    margin-bottom: v.$spacing-lg;
+    color: v.$text-primary;
+  }
+}
+
+h2 {
+  @include m.responsive-font-size(v.$font-size-lg, v.$font-size-xl);
+  
+  & {
+    margin-bottom: v.$spacing-md;
+    color: v.$text-primary;
+  }
+}
+
+h3 {
+  @include m.responsive-font-size(v.$font-size-base, v.$font-size-lg);
+  
+  & {
+    margin-bottom: v.$spacing-sm;
+    color: v.$text-primary;
+  }
+}
+
+// Material styles
 .mat-mdc-card {
+  @include m.elevation(1);
   --mdc-elevated-card-container-color: white;
+  transition: box-shadow v.$transition-duration v.$transition-timing;
+
+  &:hover {
+    @include m.elevation(2);
+  }
+
+  @include m.for-touch-device {
+    &:hover {
+      @include m.elevation(1);
+    }
+  }
+}
+
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-stroked-button,
+.mat-mdc-flat-button {
+  @include m.for-touch-device {
+    min-height: 48px;
+  }
+}
+
+.mat-icon {
+  vertical-align: middle;
+}
+
+// Error styles
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: v.$spacing-sm;
+  padding: v.$spacing-md;
+  background-color: v.$error-background;
+  border-radius: 4px;
+  color: v.$error;
+
+  .mat-icon {
+    color: v.$error;
+  }
 }
 
 .error-snackbar {
-  background: #d32f2f;
+  background: v.$error;
   color: white;
 
   .mat-simple-snackbar-action {
     color: white;
+  }
+}
+
+// Print styles
+@include m.for-print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+  }
+
+  .mat-mdc-card {
+    box-shadow: none !important;
+    border: 1px solid #ddd;
+  }
+}
+
+// Accessibility
+@include m.for-high-contrast {
+  .mat-mdc-card {
+    border: 1px solid currentColor;
   }
 }
