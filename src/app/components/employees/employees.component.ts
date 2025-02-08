@@ -4,7 +4,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { EmployeeSeatsDialogComponent } from './employee-seats-dialog/employee-seats-dialog.component';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -21,7 +20,6 @@ import { EMPTY } from 'rxjs';
     MatIconModule,
     MatInputModule,
     MatFormFieldModule,
-    MatProgressSpinnerModule,
     ReactiveFormsModule,
     MatDialogModule
   ],
@@ -91,7 +89,7 @@ export class EmployeesComponent implements AfterViewInit {
     
     // Only load more if we have room, not currently loading, no errors, and more pages available
     if (hasRoomForMore && 
-        !this.loading && 
+        !this.loading &&
         !this.error && 
         this.currentPage < this.totalPages && 
         this.employees.length > 0) {
