@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef, MatDialog } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { EmployeeService } from '../../../services/employee.service';
 import { Employee } from '../../../interfaces/employee.interface';
 import { Seat } from '../../../interfaces/seat.interface';
+import { OfficeSeatAssignmentDialogComponent } from '../../office-seat-assignment-dialog/office-seat-assignment-dialog.component';
 
 @Component({
   selector: 'app-employee-seats-dialog',
@@ -31,6 +32,7 @@ export class EmployeeSeatsDialogComponent {
     private dialogRef: MatDialogRef<EmployeeSeatsDialogComponent>,
     private employeeService: EmployeeService,
     private router: Router,
+    private dialog: MatDialog,
     @Inject(MAT_DIALOG_DATA) public employee: Employee
   ) {
     this.loadEmployeeSeats();
@@ -55,12 +57,27 @@ export class EmployeeSeatsDialogComponent {
   }
 
   reserveSeat(): void {
+    // Close the current dialog
     this.dialogRef.close();
-    this.router.navigate(['/offices'], { 
-      queryParams: { 
+    
+    // Open the office seat assignment dialog
+    const dialogRef = this.dialog.open(OfficeSeatAssignmentDialogComponent, {
+      width: '800px',
+      data: {
         employeeId: this.employee.id,
         employeeName: this.employee.fullName
-      } 
+      }
+    });
+
+    // Refresh the seats list if a seat was assigned
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        // If the dialog was closed with a successful assignment, reopen this dialog with refreshed data
+        this.dialog.open(EmployeeSeatsDialogComponent, {
+          data: this.employee,
+          width: '500px'
+        });
+      }
     });
   }
 }

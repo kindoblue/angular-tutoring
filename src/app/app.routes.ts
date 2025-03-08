@@ -11,10 +11,6 @@ export const routes: Routes = [
     loadComponent: () => import('./components/employees/employees.component').then(m => m.EmployeesComponent)
   },
   {
-    path: 'offices',
-    loadComponent: () => import('./components/offices/offices.component').then(m => m.OfficesComponent)
-  },
-  {
     path: 'floor-plans',
     loadComponent: () => import('./components/floor-plans/floor-plans.component').then(m => m.FloorPlansComponent)
   }

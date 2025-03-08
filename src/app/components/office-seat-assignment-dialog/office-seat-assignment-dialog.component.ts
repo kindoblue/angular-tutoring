@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -6,21 +6,24 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FloorService } from '../../services/floor.service';
 import { EmployeeService } from '../../services/employee.service';
 import { MatButtonModule } from '@angular/material/button';
 import { catchError } from 'rxjs/operators';
 import { EMPTY } from 'rxjs';
 import { Floor } from '../../interfaces/floor.interface';
-import { Room } from '../../interfaces/room.interface';
 import { Seat } from '../../interfaces/seat.interface';
 import { Signal, effect } from '@angular/core';
 
+export interface OfficeSeatDialogData {
+  employeeId: number;
+  employeeName: string;
+}
+
 @Component({
-  selector: 'app-offices',
+  selector: 'app-office-seat-assignment-dialog',
   standalone: true,
   imports: [
     CommonModule,
@@ -34,24 +37,23 @@ import { Signal, effect } from '@angular/core';
     ReactiveFormsModule,
     MatButtonModule
   ],
-  templateUrl: './offices.component.html',
-  styleUrls: ['./offices.component.scss']
+  templateUrl: './office-seat-assignment-dialog.component.html',
+  styleUrls: ['./office-seat-assignment-dialog.component.scss']
 })
-export class OfficesComponent implements OnInit {
+export class OfficeSeatAssignmentDialogComponent implements OnInit {
   loading = false;
   error: string | null = null;
   selectedFloorControl = new FormControl<number | null>(null);
   floors: Signal<Floor[]>;
   selectedFloor: Signal<Floor | null>;
   seatUpdate: Signal<{ seatId: number, seat: Partial<Seat> } | null>;
-  reservingForEmployee: { id: number; name: string; } | null = null;
 
   constructor(
     private floorService: FloorService,
     private employeeService: EmployeeService,
-    private route: ActivatedRoute,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private dialogRef: MatDialogRef<OfficeSeatAssignmentDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: OfficeSeatDialogData
   ) {
     this.floors = this.floorService.floors;
     this.selectedFloor = this.floorService.selectedFloor;
@@ -69,17 +71,6 @@ export class OfficesComponent implements OnInit {
   }
 
   ngOnInit() {
-    // Check if we're reserving a seat for an employee
-    this.route.queryParams.subscribe(params => {
-      if (params['employeeId'] && params['employeeName']) {
-        this.reservingForEmployee = {
-          id: parseInt(params['employeeId']),
-          name: params['employeeName']
-        };
-        console.log('Employee context set:', this.reservingForEmployee);
-      }
-    });
-
     // Handle floor selection changes
     this.selectedFloorControl.valueChanges.subscribe(floorNumber => {
       if (floorNumber !== null) {
@@ -107,11 +98,7 @@ export class OfficesComponent implements OnInit {
   }
 
   onSeatClick(seatId: number) {
-    if (this.reservingForEmployee) {
-      this.assignSeatToEmployee(this.reservingForEmployee.id, seatId);
-    } else {
-      this.showSeatInfo(seatId);
-    }
+    this.assignSeatToEmployee(this.data.employeeId, seatId);
   }
 
   private assignSeatToEmployee(employeeId: number, seatId: number) {
@@ -127,20 +114,19 @@ export class OfficesComponent implements OnInit {
           console.log('Seat assignment successful');
           
           // Directly update the seat using the FloorService
-          // The seatUpdate signal will now trigger and only update the specific seat
           this.floorService.updateSeat(seatId, {
             occupied: true,
             employees: [
               {
-                id: this.reservingForEmployee!.id,
-                fullName: this.reservingForEmployee!.name,
+                id: this.data.employeeId,
+                fullName: this.data.employeeName,
                 occupation: ''
               }
             ]
           });
           
           this.snackBar.open(
-            `Seat assigned to ${this.reservingForEmployee?.name}`,
+            `Seat assigned to ${this.data.employeeName}`,
             'Close',
             { 
               duration: 5000,
@@ -149,7 +135,7 @@ export class OfficesComponent implements OnInit {
           );
           
           this.loading = false;
-          this.reservingForEmployee = null;
+          this.dialogRef.close(true);
         },
         error: (error) => {
           console.error('Seat assignment failed:', error);
@@ -165,36 +151,8 @@ export class OfficesComponent implements OnInit {
         }
       });
   }
-  
-  private showSeatInfo(seatId: number) {
-    this.floorService.getSeatInfo(seatId).pipe(
-      catchError((error: Error) => {
-        this.snackBar.open(
-          `Failed to fetch seat information: ${error.message}`,
-          'Close',
-          { 
-            duration: 5000,
-            verticalPosition: 'top'
-          }
-        );
-        return EMPTY;
-      })
-    ).subscribe(seat => {
-      if (seat) {
-        const seatNumber = seat.seatNumber || 'Unknown';
-        const employeeName = seat.employees && seat.employees.length > 0 ? seat.employees[0].fullName : null;
-        
-        this.snackBar.open(
-          employeeName 
-            ? `Seat ${seatNumber} is occupied by ${employeeName}` 
-            : `Seat ${seatNumber} is vacant`,
-          'Close',
-          { 
-            duration: 5000,
-            verticalPosition: 'top'
-          }
-        );
-      }
-    });
+
+  onCancel(): void {
+    this.dialogRef.close(false);
   }
-}
+} 
