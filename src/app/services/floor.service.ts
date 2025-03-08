@@ -21,6 +21,9 @@ export class FloorService {
 
   /** Signal holding the list of all available floors */
   private floorsSignal = signal<Floor[]>([]);
+  
+  /** Signal for seat updates - to allow updating individual seats without refreshing the entire floor */
+  private seatUpdateSignal = signal<{ seatId: number, seat: Partial<Seat> } | null>(null);
 
   constructor(private http: HttpClient) {
     // Load the list of floors when the service is initialized
@@ -41,6 +44,14 @@ export class FloorService {
    */
   get floors() {
     return this.floorsSignal.asReadonly();
+  }
+  
+  /**
+   * Returns a readonly signal for seat updates
+   * @returns A readonly signal containing the latest seat update
+   */
+  get seatUpdate() {
+    return this.seatUpdateSignal.asReadonly();
   }
 
   /**
@@ -165,5 +176,49 @@ export class FloorService {
         return throwError(() => error);
       })
     );
+  }
+
+  /**
+   * Updates a single seat in the current floor
+   * @param seatId The ID of the seat to update
+   * @param properties The updated seat data
+   * @returns True if the seat was found and updated, false otherwise
+   */
+  updateSeat(seatId: number, properties: Partial<Seat>): boolean {
+    const currentFloor = this.selectedFloorSignal();
+    
+    if (!currentFloor || !currentFloor.rooms) {
+      return false;
+    }
+    
+    let seatFound = false;
+    
+    const updatedRooms = currentFloor.rooms.map(room => {
+      if (!room.seats) {
+        return room;
+      }
+      
+      const updatedSeats = room.seats.map(seat => {
+        if (seat.id === seatId) {
+          seatFound = true;
+          return { ...seat, ...properties };
+        }
+        return seat;
+      });
+      
+      return { ...room, seats: updatedSeats };
+    });
+    
+    if (seatFound) {
+      // Update the overall floor state
+      this.selectedFloorSignal.set({ ...currentFloor, rooms: updatedRooms });
+      
+      // Also emit a seat-specific update via the seatUpdateSignal
+      this.seatUpdateSignal.set({ seatId, seat: properties });
+      
+      return true;
+    }
+    
+    return false;
   }
 }

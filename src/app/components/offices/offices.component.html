@@ -28,10 +28,35 @@
       <p>{{error}}</p>
     </div>
 
-    <app-room-grid
-      *ngIf="!loading && !error && selectedFloorControl.value !== null"
-      [floorNumber]="selectedFloorControl.value"
-      (seatSelected)="onSeatSelected($event)"
-    ></app-room-grid>
+    <div *ngIf="!loading && selectedFloor()" class="rooms-grid">
+      <mat-card *ngFor="let room of selectedFloor()?.rooms" class="room-card">
+        <mat-card-content>
+          <div class="room-header">
+            <div class="room-info">
+              <h3>{{room.name}}</h3>
+              <p class="room-number">Room {{room.roomNumber}}</p>
+            </div>
+          </div>
+          <div class="seats-grid">
+            <ng-container *ngFor="let seat of room.seats; trackBy: trackBySeatId">
+              <div class="seat"
+                   [class.occupied]="isSeatOccupied(seat)"
+                   [class.recently-updated]="seatUpdate()?.seatId === seat.id"
+                   (click)="onSeatClick(seat.id)">
+                <div class="seat-number">{{seat.seatNumber}}</div>
+                <div class="seat-status">
+                  <span *ngIf="seat.employees && seat.employees.length > 0" class="employee-name">
+                    {{seat.employees[0].fullName}}
+                  </span>
+                  <span *ngIf="!seat.employees || seat.employees.length === 0" class="vacant">
+                    Vacant
+                  </span>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
   </div>
 </div>
