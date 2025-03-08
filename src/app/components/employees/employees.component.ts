@@ -7,7 +7,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { EmployeeSeatsDialogComponent } from './employee-seats-dialog/employee-seats-dialog.component';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { EmployeeService, Employee } from '../../services/employee.service';
+import { EmployeeService } from '../../services/employee.service';
+import { Employee } from '../../interfaces/employee.interface';
 import { debounceTime, distinctUntilChanged, catchError } from 'rxjs/operators';
 import { EMPTY } from 'rxjs';
 

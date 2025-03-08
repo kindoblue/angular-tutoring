@@ -7,6 +7,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { FloorService } from '../../services/floor.service';
+import { EmployeeService } from '../../services/employee.service';
 import { MatButtonModule } from '@angular/material/button';
 import { jsPDF } from 'jspdf';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -46,14 +47,15 @@ export class FloorPlansComponent implements OnInit {
     private floorService: FloorService,
     private dialog: MatDialog,
     private http: HttpClient,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private employeeService: EmployeeService
   ) {
-    this.floors = floorService.floors;
-    this.selectedFloor = floorService.selectedFloor;
+    this.floors = this.floorService.floors;
+    this.selectedFloor = this.floorService.selectedFloor;
   }
 
   isRoomEmpty(room: Room): boolean {
-    return !room.seats.some(seat => seat.occupied);
+    return !room.seats?.some(seat => seat.employees && seat.employees.length > 0);
   }
 
   onEmployeeClick(event: Event, employeeId: number, employeeName: string, seatId: number): void {
@@ -71,7 +73,7 @@ export class FloorPlansComponent implements OnInit {
   }
 
   private unassignSeat(employeeId: number, seatId: number): void {
-    this.http.delete(`http://localhost:8080/api/employees/${employeeId}/unassign-seat/${seatId}`)
+    this.employeeService.unassignSeat(employeeId, seatId)
       .subscribe({
         next: () => {
           // Refresh the floor data
@@ -137,11 +139,13 @@ export class FloorPlansComponent implements OnInit {
     yPosition += 20;
     doc.setFontSize(12);
     
-    room.seats.forEach(seat => {
-      if (seat.employee) {
-        const text = `${seat.seatNumber}: ${seat.employee.fullName} - ${seat.employee.occupation}`;
-        doc.text(text, 20, yPosition);
-        yPosition += 10;
+    room.seats?.forEach(seat => {
+      if (seat.employees && seat.employees.length > 0) {
+        seat.employees.forEach(employee => {
+          const text = `${seat.seatNumber}: ${employee.fullName} - ${employee.occupation}`;
+          doc.text(text, 20, yPosition);
+          yPosition += 10;
+        });
       }
     });
 

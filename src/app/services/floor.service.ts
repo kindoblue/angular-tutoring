@@ -109,12 +109,12 @@ export class FloorService {
         // Sort rooms by roomNumber before setting the floor data
         const sortedFloor = {
           ...floor,
-          rooms: [...floor.rooms].sort((a, b) => {
+          rooms: floor.rooms ? [...floor.rooms].sort((a, b) => {
             // Convert room numbers to numbers for proper numeric sorting
             const aNum = parseInt(a.roomNumber);
             const bNum = parseInt(b.roomNumber);
             return aNum - bNum;
-          })
+          }) : []
         };
         this.selectedFloorSignal.set(sortedFloor);
       },
@@ -132,24 +132,29 @@ export class FloorService {
    * Updates the selectedFloorSignal with the modified seat state
    */
   toggleSeatOccupancy(roomId: number, seatId: number) {
-    this.selectedFloorSignal.update(floor => {
-      if (!floor) return null;
-      
-      const updatedRooms = floor.rooms.map(room => {
-        if (room.id === roomId) {
+    // This is a local UI update only, not making an API call
+    const currentFloor = this.selectedFloorSignal();
+    
+    if (currentFloor && currentFloor.rooms) {
+      const updatedRooms = currentFloor.rooms.map(room => {
+        if (room.id === roomId && room.seats) {
           const updatedSeats = room.seats.map(seat => {
             if (seat.id === seatId) {
-              return { ...seat, occupied: !seat.occupied };
+              // Check if the seat has employees
+              const hasEmployees = seat.employees && seat.employees.length > 0;
+              // Toggle the occupied state based on whether there are employees
+              return { ...seat, occupied: !hasEmployees };
             }
             return seat;
           });
+          
           return { ...room, seats: updatedSeats };
         }
         return room;
       });
-
-      return { ...floor, rooms: updatedRooms };
-    });
+      
+      this.selectedFloorSignal.set({ ...currentFloor, rooms: updatedRooms });
+    }
   }
 
   getSeatInfo(seatId: number): Observable<Seat> {

@@ -4,6 +4,7 @@ export interface Floor {
   id: number;
   floorNumber: number;
   name: string;
-  createdAt: number[];
-  rooms: Room[];
+  planimetry?: string;
+  createdAt?: string;
+  rooms?: Room[];
 }

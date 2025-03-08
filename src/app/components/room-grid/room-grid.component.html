@@ -14,7 +14,7 @@
                 @for (seat of room.seats; track seat.id) {
                   <div 
                     class="seat" 
-                    [class.occupied]="seat.occupied"
+                    [class.occupied]="seat.employees && seat.employees.length > 0"
                     (click)="onSeatClick(room.id, seat.id)">
                     {{ seat.seatNumber }}
                   </div>

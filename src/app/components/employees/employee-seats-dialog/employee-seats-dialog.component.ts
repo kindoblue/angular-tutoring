@@ -5,7 +5,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { Router } from '@angular/router';
-import { Employee, EmployeeService } from '../../../services/employee.service';
+import { EmployeeService } from '../../../services/employee.service';
+import { Employee } from '../../../interfaces/employee.interface';
 import { Seat } from '../../../interfaces/seat.interface';
 
 @Component({

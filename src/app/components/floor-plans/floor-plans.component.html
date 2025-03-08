@@ -36,18 +36,21 @@
           <div class="employees-list">
             <div *ngFor="let seat of room.seats" class="seat-info">
               <div class="seat-number">{{seat.seatNumber}}</div>
-              <div [class.occupied]="seat.occupied" class="employee-info">
-                <span *ngIf="seat.employee" 
-                      class="employee-name"
-                      tabindex="0"
-                      role="button"
-                      [attr.aria-label]="'Manage seat assignment for ' + seat.employee.fullName"
-                      (click)="onEmployeeClick($event, seat.employee.id, seat.employee.fullName, seat.id)"
-                      (keydown.enter)="onEmployeeClick($event, seat.employee.id, seat.employee.fullName, seat.id)"
-                      (keydown.space)="onEmployeeClick($event, seat.employee.id, seat.employee.fullName, seat.id); $event.preventDefault()">
-                  {{seat.employee.fullName}} - {{seat.employee.occupation}}
-                </span>
-                <span *ngIf="!seat.employee" class="vacant">
+              <div [class.occupied]="seat.employees && seat.employees.length > 0" class="employee-info">
+                <ng-container *ngIf="seat.employees && seat.employees.length > 0">
+                  <div *ngFor="let employee of seat.employees" class="employee-entry">
+                    <span class="employee-name"
+                          tabindex="0"
+                          role="button"
+                          [attr.aria-label]="'Manage seat assignment for ' + employee.fullName"
+                          (click)="onEmployeeClick($event, employee.id, employee.fullName, seat.id)"
+                          (keydown.enter)="onEmployeeClick($event, employee.id, employee.fullName, seat.id)"
+                          (keydown.space)="onEmployeeClick($event, employee.id, employee.fullName, seat.id); $event.preventDefault()">
+                      {{employee.fullName}} - {{employee.occupation}}
+                    </span>
+                  </div>
+                </ng-container>
+                <span *ngIf="!seat.employees || seat.employees.length === 0" class="vacant">
                   Vacant
                 </span>
               </div>

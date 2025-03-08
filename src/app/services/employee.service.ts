@@ -3,23 +3,10 @@ import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http'
 import { Observable, throwError } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
 import { Seat } from '../interfaces/seat.interface';
+import { Employee } from '../interfaces/employee.interface';
+import { PageResponse } from '../interfaces/page-response.interface';
 
-export interface Employee {
-  id: number;
-  fullName: string;
-  occupation: string;
-  createdAt: number[];
-  seats: Seat[];
-}
-
-export interface EmployeeResponse {
-  content: Employee[];
-  totalElements: number;
-  totalPages: number;
-  currentPage: number;
-  size: number;
-}
-
+// Define API base URL
 const API_BASE_URL = 'http://localhost:8080/api';
 
 @Injectable({
@@ -34,7 +21,7 @@ export class EmployeeService {
     searchTerm = '',
     pageIndex = 0,
     pageSize = 5
-  ): Observable<EmployeeResponse> {
+  ): Observable<PageResponse<Employee>> {
     let params = new HttpParams()
       .set('page', pageIndex.toString())
       .set('size', pageSize.toString());
@@ -46,7 +33,7 @@ export class EmployeeService {
     // Use the search endpoint
     const url = `${this.apiUrl}/search`;
     
-    return this.http.get<EmployeeResponse>(url, { params }).pipe(
+    return this.http.get<PageResponse<Employee>>(url, { params }).pipe(
       retry(1),
       catchError((error) => {
         console.warn('Error fetching employees:', error);
@@ -106,6 +93,15 @@ export class EmployeeService {
     return this.http.put<void>(`${this.apiUrl}/${employeeId}/assign-seat/${seatId}`, {}).pipe(
       catchError((error) => {
         console.error('Error assigning seat:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  unassignSeat(employeeId: number, seatId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${employeeId}/unassign-seat/${seatId}`).pipe(
+      catchError((error) => {
+        console.error('Error unassigning seat:', error);
         return throwError(() => error);
       })
     );

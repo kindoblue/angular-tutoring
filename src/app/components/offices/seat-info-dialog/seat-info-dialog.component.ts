@@ -39,11 +39,11 @@ import { Seat } from '../../../interfaces/seat.interface';
           <div class="location-info">
             <div class="info-row">
               <mat-icon>apartment</mat-icon>
-              <span>Floor: {{seat.room.floor.name}}</span>
+              <span>Floor: {{seat.room?.floor?.name || 'Unknown Floor'}}</span>
             </div>
             <div class="info-row">
               <mat-icon>meeting_room</mat-icon>
-              <span>Room: {{seat.room.name}}</span>
+              <span>Room: {{seat.room?.name || 'Unknown Room'}}</span>
             </div>
             <div class="info-row">
               <mat-icon>chair</mat-icon>
@@ -51,21 +51,23 @@ import { Seat } from '../../../interfaces/seat.interface';
             </div>
           </div>
 
-          <div *ngIf="seat.employee" class="employee-info">
-            <h3>Assigned Employee</h3>
-            <div class="info-row">
-              <mat-icon>person</mat-icon>
-              <span>{{seat.employee.fullName}}</span>
-            </div>
-            <div class="info-row">
-              <mat-icon>work</mat-icon>
-              <span>{{seat.employee.occupation}}</span>
+          <div *ngIf="seat.employees && seat.employees.length > 0" class="employee-info">
+            <h3>Assigned Employees</h3>
+            <div *ngFor="let employee of seat.employees" class="employee-entry">
+              <div class="info-row">
+                <mat-icon>person</mat-icon>
+                <span>{{employee.fullName}}</span>
+              </div>
+              <div class="info-row">
+                <mat-icon>work</mat-icon>
+                <span>{{employee.occupation}}</span>
+              </div>
             </div>
           </div>
 
-          <div *ngIf="!seat.employee" class="no-employee">
+          <div *ngIf="!seat.employees || seat.employees.length === 0" class="no-employee">
             <mat-icon>person_off</mat-icon>
-            <p>No employee assigned to this seat</p>
+            <p>No employees assigned to this seat</p>
           </div>
         </div>
       </div>
@@ -73,9 +75,40 @@ import { Seat } from '../../../interfaces/seat.interface';
   `,
   styles: [`
     .dialog-container {
-      padding: 1rem;
-      min-width: 300px;
+      padding: 24px;
       max-width: 500px;
+    }
+    .dialog-content {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .info-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .employee-info {
+      border-top: 1px solid #e0e0e0;
+      padding-top: 16px;
+    }
+    .employee-entry {
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px dashed #e0e0e0;
+    }
+    .employee-entry:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+    .no-employee {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #757575;
+      padding: 20px 0;
     }
 
     .dialog-header {
@@ -89,11 +122,6 @@ import { Seat } from '../../../interfaces/seat.interface';
         font-size: 1.25rem;
         color: rgba(0, 0, 0, 0.87);
       }
-    }
-
-    .dialog-content {
-      position: relative;
-      min-height: 100px;
     }
 
     .loading-container {
@@ -125,23 +153,8 @@ import { Seat } from '../../../interfaces/seat.interface';
       padding: 1rem;
     }
 
-    .location-info, .employee-info {
+    .location-info {
       margin-bottom: 1.5rem;
-    }
-
-    .info-row {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.5rem;
-
-      mat-icon {
-        color: #1976d2;
-      }
-
-      span {
-        color: rgba(0, 0, 0, 0.87);
-      }
     }
 
     .employee-info {

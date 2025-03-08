@@ -104,6 +104,14 @@
           font-weight: 500;
         }
 
+        .employee-entry {
+          margin-bottom: 8px;
+          
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+
         .employee-name {
           cursor: pointer;
           outline: none;

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, retry, shareReplay } from 'rxjs/operators';
-import { DashboardStats } from '../interfaces/dashboard.interface';
+import { DashboardStats, DetailedDashboardStats } from '../interfaces/dashboard.interface';
 
 const API_BASE_URL = 'http://localhost:8080/api';
 
@@ -13,7 +13,7 @@ export class DashboardService {
   private apiUrl = `${API_BASE_URL}/stats`;
 
   // Mock data - replace with actual API calls in production
-  private mockStats: DashboardStats = {
+  private mockStats: DetailedDashboardStats = {
     totalEmployees: 150,
     totalFloors: 4,
     totalOffices: 40,
