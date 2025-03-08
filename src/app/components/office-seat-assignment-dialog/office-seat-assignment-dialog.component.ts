@@ -125,15 +125,6 @@ export class OfficeSeatAssignmentDialogComponent implements OnInit {
             ]
           });
           
-          this.snackBar.open(
-            `Seat assigned to ${this.data.employeeName}`,
-            'Close',
-            { 
-              duration: 5000,
-              verticalPosition: 'top'
-            }
-          );
-          
           this.loading = false;
           this.dialogRef.close(true);
         },

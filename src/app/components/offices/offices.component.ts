@@ -19,7 +19,7 @@ import { Room } from '../../interfaces/room.interface';
 import { Signal } from '@angular/core';
 
 @Component({
-  selector: 'app-floor-plans',
+  selector: 'app-offices',
   standalone: true,
   imports: [
     CommonModule,
@@ -33,10 +33,10 @@ import { Signal } from '@angular/core';
     MatDialogModule,
     MatSnackBarModule
   ],
-  templateUrl: './floor-plans.component.html',
-  styleUrls: ['./floor-plans.component.scss']
+  templateUrl: './offices.component.html',
+  styleUrls: ['./offices.component.scss']
 })
-export class FloorPlansComponent implements OnInit {
+export class OfficesComponent implements OnInit {
   loading = false;
   error: string | null = null;
   selectedFloorControl = new FormControl<number | null>(null);
@@ -66,7 +66,7 @@ export class FloorPlansComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result) {
+      if (result === true) {
         this.unassignSeat(employeeId, seatId);
       }
     });
