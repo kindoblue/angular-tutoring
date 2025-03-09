@@ -46,6 +46,11 @@
             </div>
           </div>
         </div>
+        <div class="seat-actions">
+          <button mat-icon-button color="warn" (click)="unassignSeat(seat.id, $event)" matTooltip="Remove seat assignment">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
       </div>
     </div>
 

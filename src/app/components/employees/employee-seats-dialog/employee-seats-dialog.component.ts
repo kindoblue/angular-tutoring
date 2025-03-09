@@ -15,6 +15,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Signal, effect } from '@angular/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-employee-seats-dialog',
@@ -28,7 +29,8 @@ import { Signal, effect } from '@angular/core';
     MatFormFieldModule,
     MatSelectModule,
     ReactiveFormsModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatTooltipModule
   ],
   templateUrl: './employee-seats-dialog.component.html',
   styleUrls: ['./employee-seats-dialog.component.scss']
@@ -73,6 +75,9 @@ export class EmployeeSeatsDialogComponent {
   }
 
   private loadEmployeeSeats(): void {
+    this.loading = true;
+    this.error = null;
+    
     this.employeeService.getEmployeeSeats(this.employee.id)
       .subscribe({
         next: (seats) => {
@@ -173,6 +178,43 @@ export class EmployeeSeatsDialogComponent {
             }
           );
           this.assignmentLoading = false;
+        }
+      });
+  }
+  
+  unassignSeat(seatId: number, event: Event): void {
+    // Prevent event bubbling to parent elements
+    event.stopPropagation();
+    
+    this.loading = true;
+    this.error = null;
+    
+    this.employeeService.unassignSeat(this.employee.id, seatId)
+      .subscribe({
+        next: () => {
+          console.log('Seat unassignment successful');
+          
+          this.snackBar.open('Seat unassigned successfully', 'Close', { 
+            duration: 3000,
+            verticalPosition: 'top'
+          });
+          
+          // Reload seats to update the list
+          this.loadEmployeeSeats();
+        },
+        error: (error) => {
+          console.error('Seat unassignment failed:', error);
+          this.error = error.message;
+          this.loading = false;
+          
+          this.snackBar.open(
+            `Failed to unassign seat: ${error.message}`,
+            'Close',
+            { 
+              duration: 5000,
+              verticalPosition: 'top'
+            }
+          );
         }
       });
   }
