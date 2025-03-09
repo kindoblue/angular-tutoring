@@ -8,7 +8,13 @@ import { Router } from '@angular/router';
 import { EmployeeService } from '../../../services/employee.service';
 import { Employee } from '../../../interfaces/employee.interface';
 import { Seat } from '../../../interfaces/seat.interface';
-import { OfficeSeatAssignmentDialogComponent } from '../../office-seat-assignment-dialog/office-seat-assignment-dialog.component';
+import { Floor } from '../../../interfaces/floor.interface';
+import { FloorService } from '../../../services/floor.service';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { Signal, effect } from '@angular/core';
 
 @Component({
   selector: 'app-employee-seats-dialog',
@@ -18,7 +24,11 @@ import { OfficeSeatAssignmentDialogComponent } from '../../office-seat-assignmen
     MatDialogModule,
     MatProgressSpinnerModule,
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    ReactiveFormsModule,
+    MatSnackBarModule
   ],
   templateUrl: './employee-seats-dialog.component.html',
   styleUrls: ['./employee-seats-dialog.component.scss']
@@ -27,15 +37,39 @@ export class EmployeeSeatsDialogComponent {
   seats: Seat[] = [];
   loading = true;
   error: string | null = null;
+  
+  // For seat assignment
+  isAssigningSeats = false;
+  selectedFloorControl = new FormControl<number | null>(null);
+  floors: Signal<Floor[]>;
+  selectedFloor: Signal<Floor | null>;
+  seatUpdate: Signal<{ seatId: number, seat: Partial<Seat> } | null>;
+  assignmentLoading = false;
 
   constructor(
     private dialogRef: MatDialogRef<EmployeeSeatsDialogComponent>,
     private employeeService: EmployeeService,
     private router: Router,
-    private dialog: MatDialog,
+    private floorService: FloorService,
+    private snackBar: MatSnackBar,
     @Inject(MAT_DIALOG_DATA) public employee: Employee
   ) {
     this.loadEmployeeSeats();
+    
+    // Initialize floor service signals
+    this.floors = this.floorService.floors;
+    this.selectedFloor = this.floorService.selectedFloor;
+    this.seatUpdate = this.floorService.seatUpdate;
+    
+    // Set up an effect to handle seat updates
+    effect(() => {
+      const update = this.seatUpdate();
+      // When a seat update occurs, we can do specific handling here if needed
+      if (update) {
+        console.log('Seat update detected:', update);
+        // The UI will automatically update because we're using signals
+      }
+    });
   }
 
   private loadEmployeeSeats(): void {
@@ -57,27 +91,95 @@ export class EmployeeSeatsDialogComponent {
   }
 
   reserveSeat(): void {
-    // Close the current dialog
-    this.dialogRef.close();
+    // Switch to seat assignment mode
+    this.isAssigningSeats = true;
     
-    // Open the office seat assignment dialog
-    const dialogRef = this.dialog.open(OfficeSeatAssignmentDialogComponent, {
-      width: '800px',
-      data: {
-        employeeId: this.employee.id,
-        employeeName: this.employee.fullName
+    // Resize the dialog to give more room for seat selection
+    this.dialogRef.updateSize('800px');
+    
+    // Initialize floor selection
+    const currentFloors = this.floors();
+    if (currentFloors.length > 0 && this.selectedFloorControl.value === null) {
+      this.selectedFloorControl.setValue(currentFloors[0].floorNumber);
+    }
+    
+    // Handle floor selection changes
+    this.selectedFloorControl.valueChanges.subscribe(floorNumber => {
+      if (floorNumber !== null) {
+        this.assignmentLoading = true;
+        this.error = null;
+        this.floorService.loadFloor(floorNumber);
+        this.assignmentLoading = false;
       }
     });
+  }
+  
+  // Track by functions to improve rendering performance
+  trackBySeatId(index: number, seat: any): number {
+    return seat.id;
+  }
 
-    // Refresh the seats list if a seat was assigned
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === true) {
-        // If the dialog was closed with a successful assignment, reopen this dialog with refreshed data
-        this.dialog.open(EmployeeSeatsDialogComponent, {
-          data: this.employee,
-          width: '500px'
-        });
-      }
+  isSeatOccupied(seat: any): boolean {
+    return seat.employees && seat.employees.length > 0;
+  }
+
+  onSeatClick(seatId: number) {
+    this.assignSeatToEmployee(this.employee.id, seatId);
+  }
+
+  private assignSeatToEmployee(employeeId: number, seatId: number) {
+    this.assignmentLoading = true;
+    console.log('Making API call to assign seat:', {
+      employeeId: employeeId,
+      seatId: seatId
     });
+    
+    this.employeeService.assignSeat(employeeId, seatId)
+      .subscribe({
+        next: () => {
+          console.log('Seat assignment successful');
+          
+          // Directly update the seat using the FloorService
+          this.floorService.updateSeat(seatId, {
+            occupied: true,
+            employees: [
+              {
+                id: this.employee.id,
+                fullName: this.employee.fullName,
+                occupation: ''
+              }
+            ]
+          });
+          
+          this.assignmentLoading = false;
+          this.snackBar.open('Seat assigned successfully', 'Close', { 
+            duration: 3000,
+            verticalPosition: 'top'
+          });
+          
+          // Reload seats and return to the seats view
+          this.loadEmployeeSeats();
+          this.isAssigningSeats = false;
+          this.dialogRef.updateSize('500px');
+        },
+        error: (error) => {
+          console.error('Seat assignment failed:', error);
+          this.snackBar.open(
+            `Failed to assign seat: ${error.message}`,
+            'Close',
+            { 
+              duration: 5000,
+              verticalPosition: 'top'
+            }
+          );
+          this.assignmentLoading = false;
+        }
+      });
+  }
+  
+  cancelAssignment(): void {
+    // Return to seat view
+    this.isAssigningSeats = false;
+    this.dialogRef.updateSize('500px');
   }
 }
