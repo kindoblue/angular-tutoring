@@ -29,11 +29,10 @@
       <p>No floor plan available. Please select a different floor.</p>
     </div>
 
-    <!-- SVG Container with explicit dimensions -->
-    <div *ngIf="!floorPlanService.loading() && !floorPlanService.error() && floorPlanService.floorPlanSvg()" 
-         class="svg-container" 
-         #svgContainer
-         style="width: 100%; height: 600px; min-height: 400px;">
+    <!-- Canvas Container -->
+    <div class="canvas-container" #canvasContainer>
+      <svg #backgroundSvg class="background-layer"></svg>
+      <svg #drawingLayer class="drawing-layer"></svg>
     </div>
 
     <!-- Debug info -->

@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild, effect, AfterViewInit, SecurityContext, ChangeDetectorRef } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, effect, AfterViewInit, SecurityContext, ChangeDetectorRef, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -32,7 +32,9 @@ import { DomSanitizer } from '@angular/platform-browser';
   styleUrls: ['./floor-plan.component.scss']
 })
 export class FloorPlanComponent implements OnInit, AfterViewInit {
-  @ViewChild('svgContainer', { static: false }) svgContainer!: ElementRef;
+  @ViewChild('canvasContainer') canvasContainer!: ElementRef;
+  @ViewChild('backgroundSvg') backgroundSvg!: ElementRef;
+  @ViewChild('drawingLayer') drawingLayer!: ElementRef;
   
   selectedFloorControl = new FormControl<number | null>(null);
   floors: Signal<Floor[]>;
@@ -43,12 +45,12 @@ export class FloorPlanComponent implements OnInit, AfterViewInit {
   svgContentPreview = '';
   svgContainerWidth = 0;
   svgContainerHeight = 0;
+  isContainerInitialized = false;
   
   // D3 elements
-  svg: any = null;
+  backgroundSvgSelection: any = null;
+  drawingLayerSelection: any = null;
   zoom: any = null;
-  
-  private isContainerInitialized = false;
 
   constructor(
     private floorService: FloorService,
@@ -59,8 +61,8 @@ export class FloorPlanComponent implements OnInit, AfterViewInit {
   ) {
     this.floors = this.floorService.floors;
     this.selectedFloor = this.floorService.selectedFloor;
-    
-    // Set up an effect to watch for SVG content changes
+
+    // Set up SVG content effect
     effect(() => {
       const svgContent = this.floorPlanService.floorPlanSvg();
       console.log('🔄 Effect triggered: SVG content changed', svgContent ? `(${svgContent.length} characters)` : '(null)');
@@ -68,19 +70,19 @@ export class FloorPlanComponent implements OnInit, AfterViewInit {
       if (svgContent) {
         this.svgContentPreview = svgContent.substring(0, 100) + '...';
         
-        // Only render if container is available
-        if (this.svgContainer) {
-          console.log('🎯 Container ready, rendering SVG directly');
-          setTimeout(() => this.renderSvgDirect(svgContent), 0);
+        if (this.isContainerInitialized) {
+          console.log('🎯 Container ready, rendering SVG');
+          requestAnimationFrame(() => {
+            this.renderSvgBackground(svgContent);
+            this.cdr.detectChanges();
+          });
         } else {
-          console.log('⏳ SVG container not available yet');
+          console.log('⏳ Waiting for container initialization');
         }
-      } else {
-        console.log('⚠️ No SVG content to render');
       }
     });
-    
-    // Set up an effect to watch for errors
+
+    // Set up error effect
     effect(() => {
       const error = this.floorPlanService.error();
       if (error) {
@@ -96,6 +98,11 @@ export class FloorPlanComponent implements OnInit, AfterViewInit {
   
   ngOnInit(): void {
     console.log('📋 FloorPlanComponent initialized');
+    
+    // Initialize container dimensions
+    if (this.canvasContainer) {
+      this.initializeContainer();
+    }
     
     // Handle floor selection changes
     this.selectedFloorControl.valueChanges.subscribe(floorNumber => {
@@ -115,180 +122,135 @@ export class FloorPlanComponent implements OnInit, AfterViewInit {
   }
   
   ngAfterViewInit(): void {
-    console.log('🔍 ngAfterViewInit called, container:', this.svgContainer?.nativeElement);
+    if (!this.isContainerInitialized) {
+      this.initializeContainer();
+    }
+  }
+
+  private initializeContainer(): void {
+    if (!this.canvasContainer || !this.backgroundSvg || !this.drawingLayer) return;
     
-    if (this.svgContainer) {
-      // Set initial dimensions
-      const containerElement = this.svgContainer.nativeElement;
-      containerElement.style.width = '100%';
-      containerElement.style.height = '600px'; // Set a default height
-      
-      // Force a layout recalculation
-      containerElement.getBoundingClientRect();
-      
-      // Mark container as initialized
-      this.isContainerInitialized = true;
-      
-      // Update debug info
-      this.updateContainerDimensions();
-      
-      // Force change detection
-      this.cdr.detectChanges();
-      
-      // Re-render SVG if we have it
-      const svgContent = this.floorPlanService.floorPlanSvg();
-      if (svgContent) {
-        console.log('🔁 Re-rendering SVG after view init');
-        // Use RAF for better timing
-        requestAnimationFrame(() => {
-          this.renderSvgDirect(svgContent);
-          this.cdr.detectChanges();
-        });
-      }
-    }
+    console.log('🔍 Initializing container');
+    const containerElement = this.canvasContainer.nativeElement;
+    
+    // Force a layout recalculation
+    const rect = containerElement.getBoundingClientRect();
+    this.svgContainerWidth = rect.width;
+    this.svgContainerHeight = rect.height;
+    
+    // Initialize D3 selections
+    this.backgroundSvgSelection = d3.select(this.backgroundSvg.nativeElement);
+    this.drawingLayerSelection = d3.select(this.drawingLayer.nativeElement);
+    
+    // Set up zoom on the drawing layer
+    this.initializeZoom();
+    
+    // Mark as initialized if we have dimensions
+    this.isContainerInitialized = this.svgContainerWidth > 0 && this.svgContainerHeight > 0;
+    console.log(`📏 Container dimensions: ${this.svgContainerWidth} x ${this.svgContainerHeight}`);
+    console.log(`📏 Container initialized: ${this.isContainerInitialized}`);
+    
+    // Force change detection
+    this.cdr.detectChanges();
   }
-  
-  /**
-   * Updates debug information about container dimensions
-   */
-  private updateContainerDimensions(): void {
-    if (this.svgContainer && this.svgContainer.nativeElement) {
-      const rect = this.svgContainer.nativeElement.getBoundingClientRect();
-      this.svgContainerWidth = rect.width;
-      this.svgContainerHeight = rect.height;
-      this.isContainerInitialized = this.svgContainerWidth > 0 && this.svgContainerHeight > 0;
-      console.log(`📏 Container dimensions: ${this.svgContainerWidth} x ${this.svgContainerHeight}`);
-      console.log(`📏 Container initialized: ${this.isContainerInitialized}`);
-    }
-  }
-  
-  /**
-   * Renders the SVG content directly into the container
-   */
-  private renderSvgDirect(svgContent: string): void {
-    if (!this.svgContainer || !this.isContainerInitialized) {
-      console.error('❌ SVG container not available or not initialized');
+
+  private renderSvgBackground(svgContent: string): void {
+    if (!this.backgroundSvg || !this.isContainerInitialized) {
+      console.error('❌ Background SVG not available or not initialized');
       return;
     }
     
     try {
-      console.log('🎨 Starting direct SVG rendering');
+      console.log('🎨 Starting SVG background rendering');
       
-      // Clear previous content and D3 bindings
-      if (this.svg) {
-        this.svg.on('.zoom', null);
+      // Parse the SVG content
+      const parser = new DOMParser();
+      const svgDoc = parser.parseFromString(svgContent, 'image/svg+xml');
+      
+      // Ensure we have an SVG element
+      if (!(svgDoc.documentElement instanceof SVGSVGElement)) {
+        throw new Error('Invalid SVG content');
       }
-      this.svgContainer.nativeElement.innerHTML = '';
+      const originalSvg = svgDoc.documentElement;
       
-      // Force layout recalculation
-      this.svgContainer.nativeElement.getBoundingClientRect();
+      // Get the background SVG element
+      const backgroundElement = this.backgroundSvg.nativeElement;
       
-      // Update dimensions for debug info
-      this.updateContainerDimensions();
+      // Clear existing content
+      while (backgroundElement.firstChild) {
+        backgroundElement.removeChild(backgroundElement.firstChild);
+      }
       
-      // Create a new div to hold the SVG with explicit dimensions
-      const svgDiv = document.createElement('div');
-      svgDiv.style.width = '100%';
-      svgDiv.style.height = '100%';
-      svgDiv.style.display = 'flex';
-      svgDiv.style.justifyContent = 'center';
-      svgDiv.style.alignItems = 'center';
-      svgDiv.style.minHeight = '400px'; // Set minimum height
+      // Create a root group for transformations if it doesn't exist
+      let rootGroup = backgroundElement.querySelector('g');
+      if (!rootGroup) {
+        rootGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        backgroundElement.appendChild(rootGroup);
+      }
       
-      // Set the SVG content
-      svgDiv.innerHTML = svgContent;
-      
-      // Get the SVG element
-      const svgElement = svgDiv.querySelector('svg');
-      if (svgElement) {
-        console.log('📄 Found SVG element in parsed content');
-        
-        // Make the SVG responsive
-        svgElement.setAttribute('width', '100%');
-        svgElement.setAttribute('height', '100%');
-        svgElement.style.maxWidth = '100%';
-        svgElement.style.maxHeight = '100%';
-        
-        // Force layout recalculation before getting bbox
-        svgElement.getBoundingClientRect();
-        
-        // Ensure viewBox is set if not present
-        if (!svgElement.getAttribute('viewBox')) {
-          try {
-            const bbox = svgElement.getBBox();
-            svgElement.setAttribute('viewBox', `0 0 ${bbox.width} ${bbox.height}`);
-          } catch (e) {
-            console.warn('Unable to set viewBox:', e);
-          }
-        }
-        
-        // Make sure preserveAspectRatio is set
-        svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-        
-        // Add the SVG to the container
-        this.svgContainer.nativeElement.appendChild(svgElement);
-        console.log('✅ SVG appended to container');
-        
-        // Force layout recalculation
-        svgElement.getBoundingClientRect();
-        
-        // Initialize D3 zoom using RAF
-        requestAnimationFrame(() => {
-          this.initializeZoom(svgElement);
-          this.updateContainerDimensions();
-          this.cdr.detectChanges();
-        });
+      // Copy viewBox if present
+      if (originalSvg.hasAttribute('viewBox')) {
+        backgroundElement.setAttribute('viewBox', originalSvg.getAttribute('viewBox')!);
       } else {
-        console.error('❌ No SVG element found in the content');
-        this.svgContainer.nativeElement.innerHTML = 
-          '<div class="error-message"><mat-icon>error</mat-icon><p>Failed to parse SVG content</p></div>';
+        // Try to compute viewBox from content
+        try {
+          const bbox = originalSvg.getBBox();
+          backgroundElement.setAttribute('viewBox', `${bbox.x} ${bbox.y} ${bbox.width} ${bbox.height}`);
+        } catch (e) {
+          console.warn('Unable to compute viewBox, using default');
+          backgroundElement.setAttribute('viewBox', '0 0 1000 1000');
+        }
       }
+      
+      // Copy preserveAspectRatio
+      backgroundElement.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+      
+      // Copy all child nodes into the root group
+      Array.from(originalSvg.childNodes).forEach(node => {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          rootGroup.appendChild(node.cloneNode(true));
+        }
+      });
+      
+      console.log('✅ Background SVG rendered successfully');
     } catch (error) {
-      console.error('❌ Error rendering SVG:', error);
-      this.svgContainer.nativeElement.innerHTML = 
-        '<div class="error-message"><mat-icon>error</mat-icon><p>Error rendering SVG</p></div>';
+      console.error('❌ Error rendering background SVG:', error);
     }
   }
-  
-  /**
-   * Initializes zoom behavior on the SVG element
-   */
-  private initializeZoom(svgElement: SVGElement): void {
+
+  private initializeZoom(): void {
     try {
-      // Initialize D3 zoom
-      this.svg = d3.select(svgElement);
-      
-      // Create a main group if it doesn't exist
-      let mainGroup = this.svg.select('g');
-      if (mainGroup.empty()) {
-        // If there's no group, create one and move all direct children into it
-        mainGroup = this.svg.append('g');
-        
-        // Clone all direct children (except the group we just created)
-        const children = Array.from(svgElement.childNodes);
-        children.forEach(child => {
-          if (child.nodeType === Node.ELEMENT_NODE && 
-              child !== mainGroup.node() && 
-              (child as Element).tagName !== 'g') {
-            mainGroup.node()?.appendChild(child.cloneNode(true));
-            svgElement.removeChild(child);
-          }
-        });
-      }
-      
       // Create zoom behavior
       this.zoom = d3.zoom()
         .scaleExtent([0.1, 4])
         .on('zoom', (event: any) => {
-          mainGroup.attr('transform', event.transform);
+          // Apply zoom transform to both layers
+          this.backgroundSvgSelection.select('g').attr('transform', event.transform);
+          this.drawingLayerSelection.select('g').attr('transform', event.transform);
         });
+
+      // Ensure both SVGs have a root group for transformations
+      if (this.backgroundSvgSelection.select('g').empty()) {
+        this.backgroundSvgSelection.append('g');
+      }
+      if (this.drawingLayerSelection.select('g').empty()) {
+        this.drawingLayerSelection.append('g');
+      }
       
-      // Apply zoom to SVG
-      this.svg.call(this.zoom);
+      // Enable zoom and pan on the drawing layer
+      this.drawingLayerSelection
+        .style('cursor', 'grab')
+        .call(this.zoom)
+        .on('mousedown.zoom', () => {
+          this.drawingLayerSelection.style('cursor', 'grabbing');
+        })
+        .on('mouseup.zoom', () => {
+          this.drawingLayerSelection.style('cursor', 'grab');
+        });
       
       // Set initial transform
       const initialTransform = d3.zoomIdentity.translate(0, 0).scale(0.9);
-      this.svg.call(this.zoom.transform, initialTransform);
+      this.drawingLayerSelection.call(this.zoom.transform, initialTransform);
       
       console.log('🔍 Zoom behavior initialized');
     } catch (error) {
