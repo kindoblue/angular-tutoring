@@ -22,6 +22,7 @@ export class HeaderComponent {
   navLinks = [
     { path: '/dashboard', label: 'Dashboard' },
     { path: '/employees', label: 'Employees' },
-    { path: '/offices', label: 'Office assignments' }
+    { path: '/offices', label: 'Office assignments' },
+    { path: '/floor-plan', label: 'Floor Plan' }
   ];
 } 

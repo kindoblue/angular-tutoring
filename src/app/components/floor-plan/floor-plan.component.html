@@ -1,0 +1,49 @@
+<div class="floor-plan-container">
+  <h1>Floor Plan</h1>
+
+  <mat-card class="floor-selector">
+    <mat-form-field>
+      <mat-label>Select Floor</mat-label>
+      <mat-select [formControl]="selectedFloorControl">
+        <mat-option *ngFor="let floor of floors()" [value]="floor.floorNumber">
+          {{floor.name}}
+        </mat-option>
+      </mat-select>
+      <mat-icon matSuffix>apartment</mat-icon>
+    </mat-form-field>
+  </mat-card>
+
+  <div class="floor-content">
+    <div *ngIf="floorPlanService.loading()" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading floor plan...</p>
+    </div>
+
+    <div *ngIf="floorPlanService.error()" class="error-message">
+      <mat-icon>error</mat-icon>
+      <p>{{floorPlanService.error()}}</p>
+    </div>
+
+    <div *ngIf="!floorPlanService.loading() && !floorPlanService.error() && !floorPlanService.floorPlanSvg()" class="error-message">
+      <mat-icon>info</mat-icon>
+      <p>No floor plan available. Please select a different floor.</p>
+    </div>
+
+    <!-- SVG Container with explicit dimensions -->
+    <div *ngIf="!floorPlanService.loading() && !floorPlanService.error() && floorPlanService.floorPlanSvg()" 
+         class="svg-container" 
+         #svgContainer
+         style="width: 100%; height: 600px; min-height: 400px;">
+    </div>
+
+    <!-- Debug info -->
+    <div *ngIf="debug" class="debug-info">
+      <h3>Debug Information</h3>
+      <p>SVG Content Length: {{floorPlanService.floorPlanSvg()?.length || 0}} characters</p>
+      <p>SVG Content Preview: {{svgContentPreview}}</p>
+      <p>Container Initialized: {{isContainerInitialized}}</p>
+      <p>Container Width: {{svgContainerWidth}}px</p>
+      <p>Container Height: {{svgContainerHeight}}px</p>
+    </div>
+  </div>
+</div> 
