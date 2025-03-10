@@ -34,6 +34,7 @@ export class FloorPlanComponent implements OnInit, AfterViewInit {
   private g: any;
   private zoom: any;
   private apiUrl = 'http://localhost:8080/api';
+  private viewInitialized = false;
 
   // Signals for reactive state management
   loading = signal<boolean>(false);
@@ -47,7 +48,7 @@ export class FloorPlanComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     // Handle floor selection changes
     this.selectedFloorControl.valueChanges.subscribe(floorNumber => {
-      if (floorNumber !== null) {
+      if (floorNumber !== null && this.viewInitialized) {
         this.loadFloorPlan(floorNumber);
       }
     });
@@ -60,10 +61,24 @@ export class FloorPlanComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    // Initial setup will happen when floor is selected via valueChanges
+    this.viewInitialized = true;
+    
+    // Now that the view is initialized, load the floor plan if a floor is selected
+    const selectedFloor = this.selectedFloorControl.value;
+    if (selectedFloor !== null) {
+      // Use setTimeout to avoid ExpressionChangedAfterItHasBeenCheckedError
+      setTimeout(() => {
+        this.loadFloorPlan(selectedFloor);
+      });
+    }
   }
 
   private loadFloorPlan(floorNumber: number): void {
+    if (!this.canvasContainer) {
+      console.error('Canvas container not available');
+      return;
+    }
+    
     this.loading.set(true);
     this.error.set(null);
     
@@ -105,13 +120,15 @@ export class FloorPlanComponent implements OnInit, AfterViewInit {
       .attr('class', 'interactive-layer');
 
     // Load the background SVG using D3's XML loader
-    // This demonstrates how to load external SVG content
+    console.log(`Loading SVG from: ${this.apiUrl}/floors/${floorNumber}/svg`);
     d3.xml(`${this.apiUrl}/floors/${floorNumber}/svg`).then((data) => {
       this.loading.set(false);
       
       const backgroundSvg = data.documentElement;
       // Extract the viewBox from the original SVG to maintain proportions
       const viewBox = backgroundSvg.getAttribute('viewBox');
+      
+      console.log('SVG loaded successfully, viewBox:', viewBox);
       
       // Set the viewBox on our main SVG to match the background
       if (viewBox) {
@@ -134,7 +151,7 @@ export class FloorPlanComponent implements OnInit, AfterViewInit {
   private configureZoom(backgroundGroup: any): void {
     // Configure D3 zoom behavior for pan and zoom functionality
     this.zoom = d3.zoom()
-      .scaleExtent([0.1, 4]) // Limit zoom scale between 0.1x and 4x
+      .scaleExtent([0.5, 5]) // Limit zoom scale between 0.1x and 4x
       .on('zoom', (event) => {
         // Apply the same transform to both layers to keep them in sync
         backgroundGroup.attr('transform', event.transform);
