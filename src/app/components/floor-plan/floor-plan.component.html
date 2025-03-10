@@ -14,35 +14,24 @@
   </mat-card>
 
   <div class="floor-content">
-    <div *ngIf="floorPlanService.loading()" class="loading-container">
+    <div *ngIf="loading()" class="loading-container">
       <mat-spinner diameter="40"></mat-spinner>
       <p>Loading floor plan...</p>
     </div>
 
-    <div *ngIf="floorPlanService.error()" class="error-message">
+    <div *ngIf="error()" class="error-message">
       <mat-icon>error</mat-icon>
-      <p>{{floorPlanService.error()}}</p>
+      <p>{{error()}}</p>
     </div>
 
-    <div *ngIf="!floorPlanService.loading() && !floorPlanService.error() && !floorPlanService.floorPlanSvg()" class="error-message">
+    <div *ngIf="!loading() && !error() && !selectedFloorControl.value" class="error-message">
       <mat-icon>info</mat-icon>
-      <p>No floor plan available. Please select a different floor.</p>
+      <p>No floor plan available. Please select a floor.</p>
     </div>
 
     <!-- Canvas Container -->
     <div class="canvas-container" #canvasContainer>
-      <svg #backgroundSvg class="background-layer"></svg>
-      <svg #drawingLayer class="drawing-layer"></svg>
     </div>
 
-    <!-- Debug info -->
-    <div *ngIf="debug" class="debug-info">
-      <h3>Debug Information</h3>
-      <p>SVG Content Length: {{floorPlanService.floorPlanSvg()?.length || 0}} characters</p>
-      <p>SVG Content Preview: {{svgContentPreview}}</p>
-      <p>Container Initialized: {{isContainerInitialized}}</p>
-      <p>Container Width: {{svgContainerWidth}}px</p>
-      <p>Container Height: {{svgContainerHeight}}px</p>
-    </div>
   </div>
 </div> 
