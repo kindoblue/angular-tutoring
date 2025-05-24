@@ -16,3 +16,17 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     color: white;
   }
 }
+
+// Disable animations for specific dialogs
+.no-animation-dialog {
+  .mat-mdc-dialog-container {
+    animation: none !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  
+  // Also disable any width/height transitions during resize
+  &.cdk-dialog-container {
+    transition: none !important;
+  }
+}

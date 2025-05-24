@@ -1,23 +1,13 @@
-<div class="dialog-container" [class.expanded]="isAssigningSeats">
-  <div class="dialog-header">
-    @if (!isAssigningSeats) {
-      <h2>Reserved Seats for {{employee.fullName}}</h2>
-    }
-    @if (isAssigningSeats) {
-      <div class="header-with-back">
-        <button mat-icon-button (click)="cancelAssignment()" class="back-button">
-          <mat-icon>arrow_back</mat-icon>
-        </button>
-        <h2>Assign Seat for {{employee.fullName}}</h2>
-      </div>
-    }
-    <button mat-icon-button (click)="close()">
-      <mat-icon>close</mat-icon>
-    </button>
-  </div>
-
-  <!-- Regular seats view -->
-  @if (!isAssigningSeats) {
+<div class="dialog-container">
+  <div class="views-container" [class.show-assignment]="isAssigningSeats">
+    <!-- Seats List View -->
+    <div class="view seats-view">
+        <div class="dialog-header">
+          <h2>Reserved Seats for {{employee.fullName}}</h2>
+          <button mat-icon-button (click)="close()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
     <div class="dialog-content">
       @if (loading) {
         <div class="loading-container">
@@ -78,10 +68,21 @@
         </div>
       }
     </div>
-  }
+    </div>
 
-  <!-- Seat assignment view -->
-  @if (isAssigningSeats) {
+    <!-- Assignment View -->
+    <div class="view assignment-view">
+      <div class="dialog-header">
+        <div class="header-with-back">
+          <button mat-icon-button (click)="cancelAssignment()" class="back-button">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <h2>Assign Seat for {{employee.fullName}}</h2>
+        </div>
+        <button mat-icon-button (click)="close()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
     <div class="dialog-content seat-assignment">
       <div class="employee-context">
         <mat-icon>person</mat-icon>
@@ -138,5 +139,6 @@
         }
       </div>
     </div>
-  }
+    </div>
+  </div>
 </div>

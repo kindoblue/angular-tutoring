@@ -37,8 +37,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 })
 export class EmployeeSeatsDialogComponent {
   seats: Seat[] = [];
-  loading = true;
+  loading = false;
   error: string | null = null;
+
   
   // For seat assignment
   isAssigningSeats = false;
@@ -56,26 +57,35 @@ export class EmployeeSeatsDialogComponent {
     private snackBar: MatSnackBar,
     @Inject(MAT_DIALOG_DATA) public employee: Employee
   ) {
-    this.loadEmployeeSeats();
-    
-    // Initialize floor service signals
+    // Initialize floor service signals first
     this.floors = this.floorService.floors;
     this.selectedFloor = this.floorService.selectedFloor;
     this.seatUpdate = this.floorService.seatUpdate;
     
-    // Set up an effect to handle seat updates
+    // Set up an effect to handle seat updates (without console logging to reduce noise)
     effect(() => {
       const update = this.seatUpdate();
-      // When a seat update occurs, we can do specific handling here if needed
-      if (update) {
-        console.log('Seat update detected:', update);
-        // The UI will automatically update because we're using signals
+      // The UI will automatically update because we're using signals
+    });
+    
+    // Set up an effect to handle floor loading completion
+    effect(() => {
+      const floor = this.selectedFloor();
+      if (floor && this.assignmentLoading) {
+        this.assignmentLoading = false;
       }
     });
+    
+    // Load data after a brief delay to prevent initial flicker
+    setTimeout(() => {
+      this.loadEmployeeSeats();
+    }, 0);
   }
 
-  private loadEmployeeSeats(): void {
-    this.loading = true;
+  private loadEmployeeSeats(silent: boolean = false): void {
+    if (!silent) {
+      this.loading = true;
+    }
     this.error = null;
     
     this.employeeService.getEmployeeSeats(this.employee.id)
@@ -99,13 +109,15 @@ export class EmployeeSeatsDialogComponent {
     // Switch to seat assignment mode
     this.isAssigningSeats = true;
     
-    // Resize the dialog to give more room for seat selection
-    this.dialogRef.updateSize('800px');
-    
     // Initialize floor selection
     const currentFloors = this.floors();
+    
     if (currentFloors.length > 0 && this.selectedFloorControl.value === null) {
       this.selectedFloorControl.setValue(currentFloors[0].floorNumber);
+      // Manually trigger the floor loading since setValue might not trigger valueChanges immediately
+      this.assignmentLoading = true;
+      this.error = null;
+      this.floorService.loadFloor(currentFloors[0].floorNumber);
     }
     
     // Handle floor selection changes
@@ -114,7 +126,8 @@ export class EmployeeSeatsDialogComponent {
         this.assignmentLoading = true;
         this.error = null;
         this.floorService.loadFloor(floorNumber);
-        this.assignmentLoading = false;
+        // Don't set assignmentLoading = false here, let the floor loading complete
+        // The loading will be handled by the selectedFloor signal changes
       }
     });
   }
@@ -162,10 +175,9 @@ export class EmployeeSeatsDialogComponent {
             verticalPosition: 'top'
           });
           
-          // Reload seats and return to the seats view
-          this.loadEmployeeSeats();
+          // Switch back to seats view and reload the list
           this.isAssigningSeats = false;
-          this.dialogRef.updateSize('500px');
+          this.loadEmployeeSeats(true);
         },
         error: (error) => {
           console.error('Seat assignment failed:', error);
@@ -199,8 +211,8 @@ export class EmployeeSeatsDialogComponent {
             verticalPosition: 'top'
           });
           
-          // Reload seats to update the list
-          this.loadEmployeeSeats();
+          // Reload the list to update
+          this.loadEmployeeSeats(true);
         },
         error: (error) => {
           console.error('Seat unassignment failed:', error);
@@ -220,8 +232,7 @@ export class EmployeeSeatsDialogComponent {
   }
   
   cancelAssignment(): void {
-    // Return to seat view
+    // Return to seat view - CSS will handle the size change
     this.isAssigningSeats = false;
-    this.dialogRef.updateSize('500px');
   }
 }

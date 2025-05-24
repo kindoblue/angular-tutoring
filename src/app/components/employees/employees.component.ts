@@ -143,7 +143,11 @@ export class EmployeesComponent implements AfterViewInit {
   openSeatsDialog(employee: Employee): void {
     this.dialog.open(EmployeeSeatsDialogComponent, {
       data: employee,
-      width: '500px'
+      width: '650px', // Wider to properly accommodate assignment view
+      height: '600px', // Fixed height to prevent vertical resizing
+      disableClose: false,
+      hasBackdrop: true,
+      panelClass: 'no-animation-dialog'
     });
   }
 }
